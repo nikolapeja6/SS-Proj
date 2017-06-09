@@ -53,9 +53,26 @@ public:
 	
 	void addSymbol(const string& name, const int& section_num){
 		Entry e;
-		e.type = "SYM"; e.name = name; e.num = index; e.
+		e.type = "SYM"; e.name = name; e.num = index; e.section_num = section_num;
 	}
-	void updateSymbol(const string& name, const int& value, const string& flags){}
+	void updateSymbol(const string& name, const int& value, const string& flags){
+		for (int i = 0; i < entries.size(); i++)
+			if (entries[i].name == name){
+				entries[i].value = value;
+				entries[i].flags = flags;
+					break; 
+			}
+	}
+
+	// -1 = no entry, 0 - entry without value, 1 - entry with value
+	int defined(const string& name) const{
+		for (int i = 0; i < entries.size(); i++){
+			if (entries[i].name == name)
+				return 0;
+				// check if defined
+		}
+		return -1;
+	}
 
 
 
