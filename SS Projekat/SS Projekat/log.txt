@@ -1,11 +1,5 @@
-assemble started with example.txt
-l:#i:#o1:#op2:#op3:#c:#d:.data
-l:a#i:DD#o1:a#op2:#op3:#c:#d:DD a
-l:#i:ORG#o1:0x20#op2:#op3:#c:#d:ORG 0x20
-l:#i:#o1:#op2:#op3:#c:#d:.text
-l:#i:LOAD#o1:R1#op2:a#op3:#c: ucitava sadrzaj memorijske lokacije a u registar R1#d:LOAD R1, a
-l:#i:LOAD#o1:R2#op2:#a#op3:#c: ucitava adresu lokacije a u registar R2#d:LOAD R2, #a
-l:#i:LOAD#o1:R3#op2:$a#op3:#c: ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno adresiranje#d:LOAD R3, $a
-l:x#i:JZ#o1:R0#op2:x#op3:#c: apsolutni skok na lokaciju x#d:JZ R0, x
-l:#i:JZ#o1:R0#op2:$x#op3:#c: PC relativni skok na lokaciju x#d:JZ R0, $x
-l:#i:#o1:#op2:#op3:#c:#d:.end
+get_size_of_instruction - argument 'R1 ' is not REGDIR or REGIND, so size is 8B
+get_size_of_instruction - argument '#a' is not REGDIR or REGIND, so size is 8B
+get_size_of_instruction - argument '$a' is not REGDIR or REGIND, so size is 8B
+get_size_of_instruction - argument 'R0' is not REGDIR or REGIND, so size is 8B
+get_size_of_instruction - argument 'R0' is not REGDIR or REGIND, so size is 8B

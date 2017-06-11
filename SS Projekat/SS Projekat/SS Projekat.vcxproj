@@ -77,11 +77,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="asm.h" />
+    <ClInclude Include="line.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="my_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="asm.cpp" />
+    <ClCompile Include="line.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="my_util.cpp" />
     <ClCompile Include="test.cpp" />
