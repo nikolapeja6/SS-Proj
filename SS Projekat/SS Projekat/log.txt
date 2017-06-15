@@ -1,5 +1,34 @@
-get_size_of_instruction - argument 'R1 ' is not REGDIR or REGIND, so size is 8B
-get_size_of_instruction - argument '#a' is not REGDIR or REGIND, so size is 8B
-get_size_of_instruction - argument '$a' is not REGDIR or REGIND, so size is 8B
-get_size_of_instruction - argument 'R0' is not REGDIR or REGIND, so size is 8B
-get_size_of_instruction - argument 'R0' is not REGDIR or REGIND, so size is 8B
+instruction code = 48
+ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR
+Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is 'ADD R1, R2, a'
+instruction code = 32
+PUSH, POP
+core = PUSH R1
+first = 536936448
+second = 0
+instruction code = 1
+RET
+core = RET
+first = 16777216
+second = 0
+instruction code = 0
+INT
+core = INT SP
+first = 1048576
+second = 0
+instruction code = 2
+JMP, CALL
+replcaing 'a'. src = 'a' => dst = '0'
+num 0 is 0; value is 0
+core = JMP [R1+a]
+first = 48300032
+second = 0
+instruction code = 16
+LOAD, STORE
+arg1 = 'R1'
+type fot ld_st is ''
+replcaing 'a'. src = 'a' => dst = '0'
+num 0 is 0; value is 0
+core = LOAD R1 , a
+first = 281083904
+second = 0

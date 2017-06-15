@@ -27,6 +27,15 @@
     <ClInclude Include="line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sym_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="reloc_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="content_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="asm.cpp">
@@ -42,6 +51,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="line.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sym_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="reloc_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="content_table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

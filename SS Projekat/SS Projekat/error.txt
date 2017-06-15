@@ -1,0 +1,1 @@
+Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is 'ADD R1, R2, a'

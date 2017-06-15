@@ -77,15 +77,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="asm.h" />
+    <ClInclude Include="content_table.h" />
     <ClInclude Include="line.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="my_util.h" />
+    <ClInclude Include="reloc_table.h" />
+    <ClInclude Include="sym_table.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="asm.cpp" />
+    <ClCompile Include="content_table.cpp" />
     <ClCompile Include="line.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="my_util.cpp" />
+    <ClCompile Include="reloc_table.cpp" />
+    <ClCompile Include="sym_table.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>

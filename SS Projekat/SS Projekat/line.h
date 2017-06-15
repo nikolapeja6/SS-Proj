@@ -5,6 +5,7 @@
 #include <list>
 #include <regex>
 #include <cstdint>
+#include <unordered_map>
 
 using namespace std;
 
@@ -72,7 +73,7 @@ public:
 
 	list<string> get_instruction_arguments();
 
-	list<int32_t> get_define_data_values();
+	vector<int32_t> get_define_data_values();
 
 	int get_define_data_size();
 
@@ -81,7 +82,20 @@ public:
 
 	int get_org_value();
 
-	int Line::get_section_number();
+	int get_section_number();
+
+	bool has_define_data();
+	bool has_section();
+
+	void replace_symbols(list<pair<string, int>> );
+
+
+
+	vector<uint8_t> get_encoded_instruction(list<pair<string, int>>, uint32_t pc );
+	vector<string> get_labels_in_instruction();
+
+
+	vector<uint8_t> get_encoded_define_data_values();
 
 
 
@@ -112,6 +126,7 @@ private:
 	static string stack_instruction_names;
 	static string arlog_instruction_names;
 
+
 	static string instruction_names;
 
 
@@ -125,7 +140,12 @@ private:
 	static regex pcrel;
 
 	static regex instruction;
+	static regex ld_st_extension;
 
+	static unordered_map<string, uint8_t>  instruction_codes;
+	static unordered_map<string, uint8_t>  address_codes;
+	static unordered_map<string, uint8_t>  type_codes;
+	static unordered_map<string, uint8_t>  register_codes;
 
 
 	static int IPR(string s);
@@ -136,6 +156,8 @@ private:
 public:
 
 	static int evaluate_expression(string expression);
+
+	string static replace_symbols(string str, list<pair<string, int>> symbols);
 
 	static int get_number(string str);
 

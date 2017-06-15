@@ -4,6 +4,13 @@
 
 using namespace std;
 
+#define OPCODE_OFF 24
+#define ADDRMODE_OFF 21
+#define REG0_OFF 16
+#define REG1_OFF 11
+#define REG2_OFF 6
+#define TYPE_OFF 3
+
 
 regex Line::blank("^\\s*$");
 regex Line::comment("^[^;]*;\\s*(.*)$");
@@ -40,14 +47,94 @@ string Line::instruction_names =	Line::flow_instruction_names + "|" +
 									Line::arlog_instruction_names;
 
 
-regex Line::instruction("^\\s*("+Line::instruction_names+")\\s+(.*)\\s*$");
+regex Line::instruction("^\\s*("+Line::instruction_names+")(?:\\s+(.*))?\\s*$");
 
-string Line::reg = "R(?:0?1|0?2|0?3|0?4|0?5|0?6|0?7|0?8|0?9|10|11|12|13|14|15)|PC|SP";
+regex Line::ld_st_extension("^\\s*(?:LOAD(UB|SB|UW|SW)?|STORE(B|W)?)\\s+.*$");
+
+string Line::reg = "R(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)|PC|SP";
 regex Line::immed("^#(.*)$");
-regex Line::regdir("^("+Line::reg+")$");
-regex Line::regind("^[\\s*"+Line::reg+"\\s*]$");
-regex Line::regindoff("^[\\s*" + Line::reg + "\\s*\\+\\s*(.*)\\s*]$");
-regex Line::pcrel("^\\$\\s*(\\w+)\\s*$");
+regex Line::regdir("^\\s*("+Line::reg+")\\s*$");
+regex Line::regind("^\s*\\[\\s*("+Line::reg+")\\s*\\]\\s*$");
+regex Line::regindoff("^\\s*\\[\\s*(" + Line::reg + ")\\s*\\+\\s*(.*)\\s*\\]$");
+regex Line::pcrel("^\\s*\\$\\s*(\\w+)\\s*$");
+
+
+unordered_map<string, uint8_t>  Line::instruction_codes{
+
+	{ "INT", 0x00 },
+	{ "RET", 0x01 },
+	{ "JMP", 0x02 },
+	{ "CALL", 0x03 },
+	{ "JZ", 0x04 },
+	{ "JNZ", 0x05 },
+	{ "JGZ", 0x06 },
+	{ "JGEZ", 0x07 },
+	{ "JLZ", 0x08 },
+	{ "JLEZ", 0x09 },
+
+	{ "LOAD", 0x10 },
+	{ "STORE", 0x11 },
+
+	{ "PUSH", 0x20 },
+	{ "POP", 0x21 },
+
+	{ "ADD", 0x30 },
+	{ "SUB", 0x31 },
+	{ "MUL", 0x32 },
+	{ "DIV", 0x33 },
+	{ "MOD", 0x34 },
+	{ "AND", 0x35 },
+	{ "OR", 0x36 },
+	{ "XOR", 0x37 },
+	{ "NOT", 0x38 },
+	{ "ASL", 0x39 },
+	{ "ASR", 0x3A }
+
+};
+
+unordered_map<string, uint8_t>  Line::address_codes{
+	{ "immed", 0x4 },
+	{ "regdir", 0x0 },
+	{ "memdir", 0x6 },
+	{ "regind", 0x2 },
+	{ "regindoff", 0x7 }
+};
+
+unordered_map<string, uint8_t>  Line::register_codes{
+	{ "R0", 0x00 },
+	{ "R1", 0x01 },
+	{ "R2", 0x02 },
+	{ "R3", 0x03 },
+	{ "R4", 0x04 },
+	{ "R5", 0x05 },
+	{ "R6", 0x06 },
+	{ "R7", 0x07 },
+	{ "R8", 0x08 },
+	{ "R9", 0x09 },
+	{ "R10", 0x0A },
+	{ "R11", 0x0B },
+	{ "R12", 0x0C },
+	{ "R13", 0x0D },
+	{ "R14", 0x0E },
+	{ "R15", 0x0F },
+
+	{ "SP", 0x10 },
+
+	{ "PC", 0x11 },
+
+};
+
+
+unordered_map<string, uint8_t> Line::type_codes{
+	{ "UB", 0x03},
+	{ "SB", 0x07},
+	{ "UW", 0x01},
+	{ "SW", 0x05},
+	{ "", 0x00},
+	{ "B", 0x03},
+	{ "W", 0x01}
+};
+
 
 Line::Line(string l) :line(l){}
 
@@ -86,6 +173,7 @@ bool Line::has_directive(){
 		return true;
 	}
 	catch (string s){
+		mlog.error("^^^OK, not an errror");
 		return false;
 	}
 }
@@ -353,8 +441,8 @@ list<string> Line::get_split_instruction(){
 
 
 
-list<int32_t> Line::get_define_data_values(){
-	list<int32_t> l;
+vector<int32_t> Line::get_define_data_values(){
+	vector<int32_t> l;
 
 	string name = get_directive_name();
 	
@@ -529,6 +617,669 @@ int Line::get_instruction_size(){
 	return 4;
 }
 
+
+
+bool Line::has_define_data(){
+	if (has_directive()){
+		string name = get_directive_name();
+		if (name == "DB" || name == "DW" || name == "DD")
+			return true;
+	}
+
+	return false;
+}
+bool Line::has_section(){
+	if (has_directive()){
+		string name = get_directive_name();
+		if (name == ".text" || name == ".bss" || name == ".rodata" || name ==".data")
+			return true;
+	}
+
+	return false;
+}
+
+
+void Line::replace_symbols(list<pair<string, int>> symbols){
+	
+	if (is_empty())
+		return;
+	if (!(has_directive() || has_instruction()))
+		return;
+
+	string core = get_core();
+
+	mlog.std("---replace_symbols called. Original core is '"+core+"'");
+
+	string left = "^(.*\\W)?(?:";
+	string right = ")(\\W.*)?$";
+
+	for (auto p : symbols){
+		regex replacer(left + p.first + right);
+		smatch match;
+
+		while (regex_match(core, match, replacer)){
+
+		mlog.std("replcaing '" + p.first + "'. src = '" + core + "' => dst = '" + match[1].str() + to_string(p.second) + match[2].str() + "'");
+		core = match[1].str() + to_string(p.second) + match[2].str();
+		}
+	}
+
+	string new_line = "";
+	if (has_label())
+		new_line = get_label() + ": ";
+	new_line += core;
+
+	if (has_comment())
+		new_line += " ; " + get_comment();
+
+	mlog.std("line '"+line+"'");
+	mlog.std("new line '" + new_line+"'");
+
+	line = new_line;
+
+
+	mlog.std("+++replace_symbol finished. New core is '"+core+"'");
+
+}
+
+string Line::replace_symbols(string str, list<pair<string, int>> symbols){
+
+	string left = "^(.*\\W)?(?:";
+	string right = ")(\\W.*)?$";
+
+	for (auto p : symbols){
+		regex replacer(left + p.first + right);
+		smatch match;
+
+		while (regex_match(str, match, replacer)){
+
+			mlog.std("replcaing '" + p.first + "'. src = '" + str + "' => dst = '" + match[1].str() + to_string(p.second) + match[2].str() + "'");
+			str = match[1].str() + to_string(p.second) + match[2].str();
+		}
+	}
+
+	return str;
+}
+
+
+
+vector<uint8_t> Line::get_encoded_define_data_values(){
+	try{
+		vector<int32_t> v = get_define_data_values();
+		string type = get_directive_name();
+
+		vector<uint8_t> ret;
+		ret.reserve(get_define_data_size());
+
+		int n = 0;
+
+		mlog.std("l.size = " + to_string(v.size()));
+
+		for (auto i : v){
+			if (type == "DD")
+				n = 4;
+			else if (type == "DW")
+				n = 2;
+			else if (type == "DB")
+				n = 1;
+			else{
+				string error = "define_data is not DB, DW or DD, but '" + type + "'";
+				mlog.error(error);
+				throw error;
+			}
+
+			uint8_t x;
+			uint32_t mask = UINT8_MAX;
+			for (int j = 0; j < n; j++){
+				x = (i&mask)>>(8*j);
+				mlog.std(to_string(j) + "B from " + to_string(i) + " is " + to_string(x));
+				ret.push_back(x);
+				mask <<= 8;
+			}
+		}
+
+		return ret;
+
+	}
+	catch (string s){
+		string error = "Error in get_encoded_define_data_values. " + s;
+		mlog.error(error);
+		throw error;
+	}
+}
+
+
+vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, uint32_t pc){
+	string core = get_core();
+
+	uint32_t first = 0;
+	uint32_t second = 0;
+	bool use_second = false;
+
+	// INSTRUCTION NAME and OPCODE
+	string instruction_name = get_instruction_name();
+	uint8_t instruction_code = Line::instruction_codes[instruction_name];
+	mlog.std("instruction code = "+to_string(instruction_code));
+	first |=  instruction_code<< 24;
+
+
+	// ARGUMENTS and ADDRESS CODE
+	list<string> arg = get_instruction_arguments();
+	smatch match;
+	string arg1, arg2, arg3;
+	uint8_t code;
+	
+	string error;
+
+	switch (instruction_code){
+
+
+	case 0x00: // INT
+
+		mlog.std("INT");
+
+		if (arg.size() != 1){
+			error = "Instruction format error. INT can have only 1 argument. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		if (!regex_match(arg.front(), match, Line::regdir)){
+			error = "Instruction format error. INT can have only regdir, but isn't. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg1 = match[1];
+		code = Line::register_codes[arg1];
+		first |= code << REG0_OFF;
+
+		code = Line::address_codes["regdir"];
+		first |= code << ADDRMODE_OFF;
+
+		break;
+
+	case 0x01: // RET
+		mlog.std("RET");
+
+		if (arg.size() != 0){
+			error = "Instruction format error. RET can have only 0 arguments. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		break;
+
+
+	case 0x02: // JMP
+	case 0x03: // CALL
+
+		mlog.std("JMP, CALL");
+
+		if (arg.size() != 1){
+			error = "Instruction format error. JMP, CALL can have only 1 argument. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		// REGIND
+		if (regex_match(arg.front(), match, Line::regind)){
+
+			arg1 = match[1];
+			code = Line::register_codes[arg1];
+			first |= code << REG0_OFF;
+
+			code = Line::address_codes["regind"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+		}
+
+		// REGINDOFF
+		if (regex_match(arg.front(), match, Line::regindoff)){
+
+			arg1 = match[1];
+			arg2 = match[2];
+
+			code = Line::register_codes[arg1];
+			first |= code << REG0_OFF;
+
+			arg2 = replace_symbols(arg2, symbols);
+			uint32_t val = evaluate_expression(arg2);
+			second = val;
+			use_second = true;
+
+			code = Line::address_codes["regindoff"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+		}
+
+		// PCREL
+		if (regex_match(arg.front(), match, Line::pcrel)){
+
+
+			arg1 = match[1];
+			arg1 = replace_symbols(arg1, symbols);
+
+			second = evaluate_expression(arg1);
+			second -= pc;
+			use_second = true;
+
+			code = Line::address_codes["regindoff"];
+			first |= code << ADDRMODE_OFF;
+
+			code = Line::register_codes["PC"];
+			first |= code << REG0_OFF;
+			break;
+
+		}
+
+		// MEMDIR
+		if (!regex_match(arg.front(), Line::immed) && !regex_match(arg.front(), Line::regdir)){
+
+			arg1 = arg.front();
+			arg1 = replace_symbols(arg1, symbols);
+
+			mlog.std("---" + arg1);
+
+			second = evaluate_expression(arg1);
+			use_second = true;
+
+			code = Line::address_codes["memdir"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+
+		}
+
+
+
+		error = "Instruction format error. JMP, CALL can have only regdind, regindoff and memdir, but has somethin else. Core is '" + core + "'";
+		mlog.error(error);
+		throw error;
+
+		break;
+
+
+
+
+	case 0x04: // JZ
+	case 0x05: // JNZ
+	case 0x06: // JGZ
+	case 0x07: // JGEZ
+	case 0x08: // JLZ
+	case 0x09: // JLEZ
+
+		mlog.std("JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ ");
+
+		if (arg.size() != 2){
+			error = "Instruction format error. must have 2 argument. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		// REGDIR 1.
+		if (!regex_match(arg.front(), match, Line::regdir)){
+			error = "Instruction format error. JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ must have a REGISTER as 1. argument. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg1 = match[1];
+
+		first |= Line::register_codes[arg1] << REG0_OFF;
+
+		// NOT IMMED and NOT REGDIR 2.
+		if (regex_match(arg.back(), Line::immed) || regex_match(arg.back(), Line::regdir)){
+			error = "Instruction format error. JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ must have MEMDIR, REGIND or REGINDOFF as 2. argument. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		// REGIND
+		if (regex_match(arg.back(), match, Line::regind)){
+
+			arg2 = match[1];
+			code = Line::register_codes[arg2];
+			first |= code << REG1_OFF;
+
+			code = Line::address_codes["regind"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+
+		}
+
+
+		// REGINDOFF
+		if (regex_match(arg.back(), match, Line::regindoff)){
+
+			arg1 = match[1];
+			arg2 = match[2];
+
+			code = Line::register_codes[arg1];
+			first |= code << REG1_OFF;
+
+			arg2 = replace_symbols(arg2, symbols);
+			uint32_t val = evaluate_expression(arg2);
+			second = val;
+			use_second = true;
+
+			code = Line::address_codes["regindoff"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+		}
+
+		// PCREL
+		if (regex_match(arg.back(), match, Line::pcrel)){
+
+
+			arg1 = match[1];
+			arg1 = replace_symbols(arg1, symbols);
+
+			second = evaluate_expression(arg1);
+			second -= pc;
+			use_second = true;
+
+			code = Line::address_codes["regindoff"];
+			first |= code << ADDRMODE_OFF;
+
+			code = Line::register_codes["PC"];
+			first |= code << REG1_OFF;
+			break;
+
+		}
+
+		// MEMDIR
+		if (!regex_match(arg.back(), Line::immed) && !regex_match(arg.back(), Line::regdir)){
+
+			arg1 = arg.back();
+			arg1 = replace_symbols(arg1, symbols);
+
+			mlog.std(arg1);
+
+			second = evaluate_expression(arg1);
+			use_second = true;
+
+			code = Line::address_codes["memdir"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+
+		}
+
+
+		error = "Instruction format error. JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ can have only regdind, regindoff and memdir, but has somethin else. Core is '" + core + "'";
+		mlog.error(error);
+		throw error;
+
+		break;
+
+
+
+	case 0x10: // LOAD
+	case 0x11: // STORE
+
+		mlog.std("LOAD, STORE");
+
+
+		if (arg.size() != 2){
+			error = "Instruction format error. STORE, LOAD must have 2 argument. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		// REGDIR 1.
+		if (!regex_match(arg.front(), match, Line::regdir)){
+			error = "Instruction format error. STORE, LOAD must have a REGISTER as 1. argument. Core is '" + core + "'. '" + arg.front() + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg1 = match[1];
+		mlog.std("arg1 = '" + arg1+"'");
+
+		first |= Line::register_codes[arg1] << REG0_OFF;
+
+
+
+		if (!regex_match(core, match, Line::ld_st_extension)){
+			error = "Instruction format error - STORE, LOAD wrong extension. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		// TYPE
+		arg2 = match[1];
+		mlog.std("type fot ld_st is '" + arg2 + "'");
+		first |= Line::type_codes[arg2] << TYPE_OFF;
+
+		
+
+		// REGIND 2.
+		if (regex_match(arg.back(), match, Line::regind)){
+
+			arg2 = match[1];
+			code = Line::register_codes[arg2];
+			first |= code << REG1_OFF;
+
+			code = Line::address_codes["regind"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+
+		}
+
+
+		// REGINDOFF 2.
+		if (regex_match(arg.back(), match, Line::regindoff)){
+
+			arg1 = match[1];
+			arg2 = match[2];
+
+			code = Line::register_codes[arg1];
+			first |= code << REG1_OFF;
+
+			arg2 = replace_symbols(arg2, symbols);
+			uint32_t val = evaluate_expression(arg2);
+			second = val;
+			use_second = true;
+
+			code = Line::address_codes["regindoff"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+		}
+
+		// PCREL 2.
+		if (regex_match(arg.back(), match, Line::pcrel)){
+
+
+			arg1 = match[1];
+			arg1 = replace_symbols(arg1, symbols);
+
+			second = evaluate_expression(arg1);
+			second -= pc;
+			use_second = true;
+
+			code = Line::address_codes["regindoff"];
+			first |= code << ADDRMODE_OFF;
+
+			code = Line::register_codes["PC"];
+			first |= code << REG1_OFF;
+			break;
+
+		}
+
+		// REGDIR 2.
+		if (regex_match(arg.back(), match, Line::regdir)){
+			arg1 = match[1];
+			first |= Line::register_codes[arg1] << REG1_OFF;
+
+			break;
+		}
+
+		// IMMED 2.
+		if (regex_match(arg.back(), match, Line::immed)){
+			if (instruction_code == 0x11){
+				error = "Instruction format error. IMMED not allowed in STORE. Core is '" + core + "'";
+				mlog.error(error);
+				throw error;
+			}
+
+			first = Line::address_codes["immmed"] << ADDRMODE_OFF;
+
+			arg2 = match[1];
+
+			arg2 = replace_symbols(arg2, symbols);
+
+			second = evaluate_expression(arg2);
+			use_second = true;
+
+			break;
+		}
+
+		// MEMDIR
+
+		arg1 = arg.back();
+		arg1 = replace_symbols(arg1, symbols);
+
+		second = evaluate_expression(arg1);
+		use_second = true;
+
+		code = Line::address_codes["memdir"];
+		first |= code << ADDRMODE_OFF;
+
+		break;
+
+
+
+	case 0x20: // PUSH
+	case 0x21: // POP
+
+		mlog.std("PUSH, POP");
+
+
+		if (arg.size() != 1){
+			error = "Instruction format error. PUSH, POP must have 1 argument. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		// REGDIR
+		if (regex_match(arg.front(), match, Line::regdir)){
+			arg1 = match[1];
+			first |= Line::register_codes[arg1] << REG0_OFF;
+			break;
+		}
+
+		error = "Instruction format error. PUSH, POP must have REGDIR. Core is '" + core + "'";
+		mlog.error(error);
+		throw error;
+
+	case 0x30: // ADD
+	case 0x31: // SUB
+	case 0x32: // MUL
+	case 0x33: // DIV
+	case 0x34: // MOD
+	case 0x35: // AND
+	case 0x36: // OR
+	case 0x37: // XOR
+	case 0x38: // NOT
+	case 0x39: // ASL
+	case 0x3A: // ASR
+
+		mlog.std("ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR");
+
+
+		if (arg.size() != 3){
+			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have 3 arguments. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg1 = arg.front();
+		arg.pop_front();
+		arg2 = arg.front();
+		arg3 = arg.back();
+
+		if (!regex_match(arg1, match, Line::regdir)){
+			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg1 = match[1];
+		code = Line::register_codes[arg1];
+		first |= code << REG0_OFF;
+
+
+		if (!regex_match(arg2, match, Line::regdir)){
+			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg2 = match[1];
+		code = Line::register_codes[arg2];
+		first |= code << REG1_OFF;
+
+
+		if (!regex_match(arg3, match, Line::regdir)){
+			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
+			mlog.error(error);
+			throw error;
+		}
+
+		arg3 = match[1];
+		code = Line::register_codes[arg3];
+		first |= code << REG2_OFF;
+	
+		break;
+
+
+	}
+
+	mlog.std("core = " + core);
+	mlog.std("first = " + to_string(first));
+	mlog.std("second = " + to_string(second));
+
+	vector<uint8_t> v;
+
+	uint32_t mask = UINT8_MAX;
+	for (int i = 0; i < 4; i++){
+		uint8_t x = (mask&first) >> (8 * i);
+		v.push_back(x);
+		mask <<= 8;
+	}
+
+	if (use_second)
+	for (int i = 0; i < 4; i++){
+		uint8_t x = (mask&second) >> (8 * i);
+		v.push_back(x);
+		mask <<= 8;
+	}
+
+	return v;
+
+}
+
+
+/*
+vector<string> Line::get_labels_in_instruction(){
+	vector<string> ret;
+
+	while (true){
+		try{}
+		catch (string s){
+			
+		}
+	}
+}
+
+*/
 
 
 

@@ -460,7 +460,64 @@ void test22(){
 }
 
 
+void test23(){
+	assemble("example.txt");
+}
 
+
+void test24(){
+	Line lines[] = { "DB 5" , "DW 256", "DD 16843010"};
+
+	for (int i = 0; i < 3; i++){
+		try{
+			cout << lines[i].get_line() << endl;
+			for (auto k : lines[i].get_encoded_define_data_values())
+				cout << (int)k << " ";
+			cout << endl;
+		}
+		catch (string s){
+			cout << s << endl;
+		}
+		cout << endl;
+	}
+}
+
+void test25(){
+	Line lines[]{
+		"ADD R1, R2, a",
+			"PUSH R1",
+			"RET",
+			"INT SP",
+			"JMP [R1+a]",
+			""
+		"\tLOAD R1 , a; ucitava sadrzaj memorijske lokacije a u registar R1",
+		"LOAD R2, #a; ucitava adresu lokacije a u registar R2",
+		"LOAD R3, $a; ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno adresiranje",
+		"x : JZ R0, x; apsolutni skok na lokaciju x",
+		"JZ R0, $x; PC relativni skok na lokaciju x"
+	};
+
+	list<pair<string, int>> list;
+	list.push_back(make_pair("a", 0));
+	list.push_back(make_pair("x", 10));
+
+
+	for (int i = 0; i <6; i++){
+		try{
+			cout << lines[i].get_core() << endl;
+			cout << lines[i].has_instruction() << endl;
+			if (lines[i].has_instruction())
+				for (unsigned x : lines[i].get_encoded_instruction(list))
+					cout << hex << x << " ";
+
+
+			cout <<"---"<< endl;
+		}
+		catch (string s){
+			cout << s << endl;
+		}
+	}
+}
 
 
 
@@ -471,7 +528,7 @@ int main(){
 	//test3();
 	//test4();
 
-	test22();
+	test25();
 
 	
 }
