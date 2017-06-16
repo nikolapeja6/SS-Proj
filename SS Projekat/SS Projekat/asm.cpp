@@ -335,13 +335,16 @@ string assemble(const string& path_to_source){
 	}
 	
 
-	cout << output.str() << endl;
-
 	mlog.std("\n\n\n***\n\n" + output.str());
+
+	ofstream out;
+	out.open(path_to_source+ ".obj");
+	out << output.str();
+	out.close();
 	
 
 
 	mlog.std("assemble finished");
 
-	return "";
+	return path_to_source+".obj";
 }
