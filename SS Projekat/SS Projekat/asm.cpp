@@ -36,6 +36,11 @@ string assemble(const string& path_to_source){
 	int section_index = -1;
 	string section_type = "";
 
+	string error = "";
+	int i = 0;
+
+	bool end = false;
+
 	list<pair<string, int>> symbols;
 
 	list<string> global;
@@ -44,108 +49,127 @@ string assemble(const string& path_to_source){
 
 	while (getline(fin, l)){
 		Line line(l);
+		i++;
 
-		int move = 0;
+		try{
+			int move = 0;
 
 
-		if (line.is_empty())
-			continue;
+			if (line.is_empty())
+				continue;
 
-		if (!line.has_section()){
-			if (line.has_label()){
-				string name = line.get_label();
-				symbol_table.add_symbol_entry(name, pc, section_index);
-				symbols.push_back(make_pair(name, pc));
+			if (!line.has_section()){
+				if (line.has_label()){
+					string name = line.get_label();
+					symbol_table.add_symbol_entry(name, pc, section_index);
+					symbols.push_back(make_pair(name, pc));
 
-				if (ORG)
-					symbol_table.set_symbol_to_absolute(name);
+					if (ORG)
+						symbol_table.set_symbol_to_absolute(name);
+				}
 			}
-		}
 
-		if (line.has_directive()){
-			string directive_name = line.get_directive_name();
+			if (line.has_directive()){
+				string directive_name = line.get_directive_name();
 
-			if (directive_name == "ORG"){
+				if (directive_name == "ORG"){
+					if (section_index != -1)
+						symbol_table.set_section_size(section_index, pc);
+					next_ORG = true;
+
+					line.replace_symbols(symbols);
+
+					pc = line.get_org_value(); // CONST
+				}
+				else if (line.has_define_data()){
+
+					line.replace_symbols(symbols);
+
+					move = line.get_define_data_size(); // CONST
+				}
+				else if (directive_name == "DEF"){
+
+					line.replace_symbols(symbols);
+
+					pair<string, int> sym_const = line.get_symbolic_constant(); // CONST
+					//symbolic_constants.push_back(sym_const);
+					symbols.push_back(sym_const);
+				}
+				else if (line.has_section()){
+
+					if (section_index != -1 && !next_ORG)
+						symbol_table.set_section_size(section_index, pc);
+
+					string name = line.get_directive();
+					if (!next_ORG)
+						pc = 0;
+					symbol_table.add_section_entry(name, pc);
+
+
+					ORG = next_ORG;
+					next_ORG = false;
+
+					if (ORG)
+						symbol_table.set_section_to_absolute(name);
+
+					section_index = symbol_table.get_index_of_section(name);
+					section_type = line.get_directive_name();
+
+				}
+				else if (line.get_directive_name() == ".global"){
+
+					global.splice(global.end(), line.get_directive_arguments());
+				}
+			}
+
+
+			if (line.has_instruction()){
+				move = line.get_instruction_size();
+			}
+
+			if (line.has_section()){
+				if (line.has_label()){
+					string name = line.get_label();
+					symbol_table.add_symbol_entry(name, pc, section_index);
+					symbols.push_back(make_pair(name, pc));
+
+					if (ORG)
+						symbol_table.set_symbol_to_absolute(name);
+				}
+			}
+
+			if (line.has_directive() && line.get_directive_name() == ".end"){
+				end = true;
 				if (section_index != -1)
 					symbol_table.set_section_size(section_index, pc);
-				next_ORG = true;
-
-				line.replace_symbols(symbols);
-
-				pc = line.get_org_value(); // CONST
+				break;
 			}
-			else if (line.has_define_data()){
 
-				line.replace_symbols(symbols);
 
-				move = line.get_define_data_size(); // CONST
-			}
-			else if (directive_name == "DEF"){
+			mlog.std("line is '" + line.get_line() + "; pc = " + to_string(pc) + "; new pc = " + to_string(pc + move));
+			pc += move;
 
-				line.replace_symbols(symbols);
-
-				pair<string, int> sym_const = line.get_symbolic_constant(); // CONST
-				//symbolic_constants.push_back(sym_const);
-				symbols.push_back(sym_const);
-			}
-			else if (line.has_section()){
-
-				if (section_index != -1 && !next_ORG)
-					symbol_table.set_section_size(section_index, pc);
-
-				string name = line.get_directive();
-				if (!next_ORG)
-					pc = 0;
-				symbol_table.add_section_entry(name, pc);
-				
-
-				ORG = next_ORG;
-				next_ORG = false;
-
-				if (ORG)
-					symbol_table.set_section_to_absolute(name);
-
-				section_index = symbol_table.get_index_of_section(name);
-				section_type = line.get_directive_name();
-				
-			}
-			else if (line.get_directive_name() == ".global"){
-				
-				global.splice(global.end(), line.get_directive_arguments());
-			}
 		}
-
-		
-		if (line.has_instruction()){
-			move = line.get_instruction_size();
+		catch (string s){
+			error += to_string(i)+":\t"+line.get_line()+"\n\t"+s+"\n";
 		}
-
-		if (line.has_section()){
-			if (line.has_label()){
-				string name = line.get_label();
-				symbol_table.add_symbol_entry(name, pc, section_index);
-				symbols.push_back(make_pair(name, pc));
-
-				if (ORG)
-					symbol_table.set_symbol_to_absolute(name);
-			}
-		}
-
-		if (line.has_directive() && line.get_directive_name() == ".end"){
-			if (section_index != -1)
-				symbol_table.set_section_size(section_index, pc);
-			break;
-		}
-
-
-		mlog.std("line is '" + line.get_line() + "; pc = " + to_string(pc) + "; new pc = " + to_string(pc + move));
-		pc += move;
 
 	}
 
-	mlog.std("Table after first pass - " + symbol_table.str());
+	if (!end)
+		symbol_table.set_section_size(section_index, pc);
+
 
 	fin.close();
+
+	mlog.std("Table after first pass - " + symbol_table.str());
+
+	if (error != ""){
+		error = "Errors occured on the following lines while assembling (first pass):\n\n" + error;
+		mlog.error(error);
+		cout << error << endl;
+		exit(2);
+	}
 
 	for (string s : global){
 		if (symbol_table.has_symbol(s))
@@ -158,7 +182,7 @@ string assemble(const string& path_to_source){
 	mlog.std("Table after global - " + symbol_table.str());
 
 
-	/*
+	
 	
 	fin.open(path_to_source);
 
@@ -175,97 +199,138 @@ string assemble(const string& path_to_source){
 	ORG = false;
 	next_ORG = false;
 	bool first_section = true;
+	i = 0;
 
 	RelocationTable reloc;
 	ContentTable con;
 
 	stringstream output;
-	output << symbol_table << endl;
+	output << symbol_table;
 
 	// SECOND PASS
 
 	while (getline(fin, l)){
 		Line line(l);
+		i++;
 
-		int move = 0;
+		try{
 
-		if (line.is_empty())
-			continue;
 
-		
+			int move = 0;
 
-		if (line.has_directive()){
-			string directive_name = line.get_directive_name();
+			if (line.is_empty())
+				continue;
 
-			if (directive_name == "ORG"){
-				// ORG
 
-				next_ORG = true;
 
-				line.replace_symbols(symbols);
-				pc = line.get_org_value(); // CONST
+			if (line.has_directive()){
+				string directive_name = line.get_directive_name();
+				if (line.has_define_data()){
+
+					// DEFINE DATA
+
+					vector<pair<string, int>> relocation_data;
+					relocation_data = line.get_labels_in_define_data(symbols, pc);
+
+					line.replace_symbols(symbols);
+
+					move = line.get_define_data_size(); // CONST
+
+					vector<unsigned char> data = line.get_encoded_define_data_values();
+					con.append(data);
+
+					for (auto p : relocation_data){
+						int index = symbol_table.get_index_of_symbol(p.first);
+						reloc.add_absolute_entry(index, p.second);
+					}
+				}
+				else if (line.has_section()){
+
+					// SECTION
+
+					string name = line.get_directive();
+					if (!first_section)
+						output << reloc << con << endl;
+					else
+						first_section = false;
+
+					if (!next_ORG)
+						pc = 0;
+					ORG = next_ORG;
+					next_ORG = false;
+
+					con.empty();
+					reloc.empty();
+
+					con.set_section_name(name);
+					reloc.set_section_name(name);
+				}
+
 			}
-			else if (line.has_define_data()){
 
-				// DEFINE DATA
 
-				line.replace_symbols(symbols);
+			if (line.has_instruction()){
+				move = line.get_instruction_size();
 
-				move = line.get_define_data_size(); // CONST
+				bool pcrel = false;
 
-				vector<uint8_t> data = line.get_encoded_define_data_values();
-
+				vector<unsigned char> data = line.get_encoded_instruction(symbols, pc, pcrel);
 				con.append(data);
+
+				vector<string> relocation_symbols;
+				relocation_symbols = line.get_labels_in_instruction(symbols);
+
+
+
+				for (string s : relocation_symbols){
+					int index = symbol_table.get_index_of_symbol(s);
+
+					if (pcrel)
+						reloc.add_relative_entry(index, pc + 4);
+					else
+						reloc.add_absolute_entry(index, pc + 4);
+				}
+
+					
 			}
-			else if (line.has_section()){
-
-				// SECTION
-
-				string name = line.get_directive();
-				if (!first_section)
-					output << reloc << endl << con << endl;
-				else
-					first_section = false;
-
-				if (!next_ORG)
-					pc = 0;
-				ORG = next_ORG;
-				next_ORG = false;
-
-				con.empty();
-				reloc.empty();
-
-				con.set_section_name(name);
-				reloc.set_section_name(name);
-
-
-
-
-			}
-		
-		}
-
-
-		if (line.has_instruction()){
-			move = line.get_instruction_size();
-		}
-
-		if (line.has_directive() && line.get_directive_name() == ".end"){
-			if (section_index != -1)
-				symbol_table.set_section_size(section_index, pc);
-			break;
-		}
-
-
-		mlog.std("line is '" + line.get_line() + "; pc = " + to_string(pc) + "; new pc = " + to_string(pc + move));
-		pc += move;
 
 		
+			if (line.has_directive() && line.get_directive_name() == ".end"){
+				if (section_index != -1)
+					output << reloc << con;
+				break;
+			}
 
+
+			mlog.std("line is '" + line.get_line() + "; pc = " + to_string(pc) + "; new pc = " + to_string(pc + move));
+			pc += move;
+
+		}
+		catch (string s){
+			error += to_string(i) + ":\t" + line.get_line() + "\n\t" + s + "\n";
+		}
+
+	}
+
+	if (!end)
+		output << reloc << con;
+
+
+	fin.close();
+
+
+	if (error != ""){
+		error = "Errors occured on the following lines while assembling (second pass):\n\n" + error;
+		mlog.error(error);
+		cout << error << endl;
+		exit(3);
 	}
 	
 
-	*/
+	cout << output.str() << endl;
+
+	mlog.std("\n\n\n***\n\n" + output.str());
+	
 
 
 	mlog.std("assemble finished");

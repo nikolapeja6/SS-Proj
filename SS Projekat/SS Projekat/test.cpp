@@ -501,17 +501,18 @@ void test25(){
 	list.push_back(make_pair("a", 0));
 	list.push_back(make_pair("x", 10));
 
+	bool pcrel = false;
 
 	for (int i = 0; i <6; i++){
 		try{
 			cout << lines[i].get_core() << endl;
 			cout << lines[i].has_instruction() << endl;
 			if (lines[i].has_instruction())
-				for (unsigned x : lines[i].get_encoded_instruction(list))
+				for (unsigned x : lines[i].get_encoded_instruction(list, 0, pcrel))
 					cout << hex << x << " ";
 
 
-			cout <<"---"<< endl;
+			cout <<endl<<"---"<< endl;
 		}
 		catch (string s){
 			cout << s << endl;
@@ -519,6 +520,73 @@ void test25(){
 	}
 }
 
+
+void test26(){
+	Line lines[]{
+		"ADD R1, R2, a",
+			"PUSH R1",
+			"RET",
+			"INT SP",
+			"JMP [R1+a+x]",
+			"\tLOAD R1 , a; ucitava sadrzaj memorijske lokacije a u registar R1",
+			"LOAD R2, #a; ucitava adresu lokacije a u registar R2",
+			"LOAD R3, $a; ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno adresiranje",
+			"x : JZ R0, x; apsolutni skok na lokaciju x",
+			"JZ R0, $x; PC relativni skok na lokaciju x"
+	};
+
+	list<pair<string, int>> list;
+	list.push_back(make_pair("a", 0));
+	list.push_back(make_pair("x", 10));
+
+
+	for (int i = 0; i <10; i++){
+		try{
+			cout << lines[i].get_core() << endl;
+			cout << lines[i].has_instruction() << endl;
+			if (lines[i].has_instruction())
+				for (string x : lines[i].get_labels_in_instruction(list))
+					cout << x << " ";
+
+
+			cout << endl<<"---" << endl;
+		}
+		catch (string s){
+			cout << s << endl;
+		}
+	}
+}
+
+void test27(){
+	Line lines[]{
+		" DB a",
+		"DD a",
+		"DW a, x",
+		"DB 3 DUP a",
+		"DD x, 3 DUP a, x"
+	};
+
+	list<pair<string, int>> list;
+	list.push_back(make_pair("a", 0));
+	list.push_back(make_pair("x", 10));
+
+
+	for (int i = 0; i <5; i++){
+		try{
+			cout << lines[i].get_core() << endl;
+			cout << lines[i].has_define_data() << endl;
+			if (lines[i].has_define_data())
+				for (auto x : lines[i].get_labels_in_define_data(list, 0))
+					cout << x.first << ":"<<x.second<<" ";
+
+
+			cout << endl << "---" << endl;
+		}
+		catch (string s){
+			cout << s << endl;
+		}
+	}
+}
 
 
 int main(){
@@ -528,7 +596,7 @@ int main(){
 	//test3();
 	//test4();
 
-	test25();
+	test23();
 
 	
 }

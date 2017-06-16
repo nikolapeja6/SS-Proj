@@ -13,11 +13,11 @@ void ContentTable::set_section_name(string name){
 
 ContentTable::ContentTable(string name) : section_name(name){}
 
-void ContentTable::append(vector<uint8_t> new_data){
+void ContentTable::append(vector<unsigned char> new_data){
 	data.insert(data.end(), new_data.begin(), new_data.end());
 }
 
-void ContentTable::append(list<uint8_t> new_data){
+void ContentTable::append(list<unsigned char> new_data){
 	data.insert(data.end(), new_data.begin(), new_data.end());
 }
 
@@ -37,7 +37,7 @@ string ContentTable::str()const{
 
 	for (int i = 0; i < data.size(); ){
 		for (int j = 0; i < data.size() && j < 16; i++, j++)
-			out << hex << setw(2) << setfill('0') << data[i] << " ";
+			out << setfill('0') << setw(2) << hex << data[i] << " ";
 		
 		if (i < data.size())
 			out << endl;

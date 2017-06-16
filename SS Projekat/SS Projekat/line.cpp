@@ -59,7 +59,7 @@ regex Line::regindoff("^\\s*\\[\\s*(" + Line::reg + ")\\s*\\+\\s*(.*)\\s*\\]$");
 regex Line::pcrel("^\\s*\\$\\s*(\\w+)\\s*$");
 
 
-unordered_map<string, uint8_t>  Line::instruction_codes{
+unordered_map<string, unsigned char>  Line::instruction_codes{
 
 	{ "INT", 0x00 },
 	{ "RET", 0x01 },
@@ -92,7 +92,7 @@ unordered_map<string, uint8_t>  Line::instruction_codes{
 
 };
 
-unordered_map<string, uint8_t>  Line::address_codes{
+unordered_map<string, unsigned char>  Line::address_codes{
 	{ "immed", 0x4 },
 	{ "regdir", 0x0 },
 	{ "memdir", 0x6 },
@@ -100,7 +100,7 @@ unordered_map<string, uint8_t>  Line::address_codes{
 	{ "regindoff", 0x7 }
 };
 
-unordered_map<string, uint8_t>  Line::register_codes{
+unordered_map<string, unsigned char>  Line::register_codes{
 	{ "R0", 0x00 },
 	{ "R1", 0x01 },
 	{ "R2", 0x02 },
@@ -125,7 +125,7 @@ unordered_map<string, uint8_t>  Line::register_codes{
 };
 
 
-unordered_map<string, uint8_t> Line::type_codes{
+unordered_map<string, unsigned char> Line::type_codes{
 	{ "UB", 0x03},
 	{ "SB", 0x07},
 	{ "UW", 0x01},
@@ -703,12 +703,12 @@ string Line::replace_symbols(string str, list<pair<string, int>> symbols){
 
 
 
-vector<uint8_t> Line::get_encoded_define_data_values(){
+vector<unsigned char> Line::get_encoded_define_data_values(){
 	try{
 		vector<int32_t> v = get_define_data_values();
 		string type = get_directive_name();
 
-		vector<uint8_t> ret;
+		vector<unsigned char> ret;
 		ret.reserve(get_define_data_size());
 
 		int n = 0;
@@ -728,7 +728,7 @@ vector<uint8_t> Line::get_encoded_define_data_values(){
 				throw error;
 			}
 
-			uint8_t x;
+			unsigned char x;
 			uint32_t mask = UINT8_MAX;
 			for (int j = 0; j < n; j++){
 				x = (i&mask)>>(8*j);
@@ -748,8 +748,11 @@ vector<uint8_t> Line::get_encoded_define_data_values(){
 	}
 }
 
+#include <iostream>
+#include <iomanip>
 
-vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, uint32_t pc){
+
+vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symbols, uint32_t pc, bool& pcrel){
 	string core = get_core();
 
 	uint32_t first = 0;
@@ -758,7 +761,7 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 
 	// INSTRUCTION NAME and OPCODE
 	string instruction_name = get_instruction_name();
-	uint8_t instruction_code = Line::instruction_codes[instruction_name];
+	unsigned char instruction_code = Line::instruction_codes[instruction_name];
 	mlog.std("instruction code = "+to_string(instruction_code));
 	first |=  instruction_code<< 24;
 
@@ -767,7 +770,7 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 	list<string> arg = get_instruction_arguments();
 	smatch match;
 	string arg1, arg2, arg3;
-	uint8_t code;
+	unsigned char code;
 	
 	string error;
 
@@ -871,6 +874,9 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 
 			code = Line::register_codes["PC"];
 			first |= code << REG0_OFF;
+
+			pcrel = true;
+
 			break;
 
 		}
@@ -988,6 +994,9 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 
 			code = Line::register_codes["PC"];
 			first |= code << REG1_OFF;
+
+			pcrel = true;
+
 			break;
 
 		}
@@ -1109,6 +1118,9 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 
 			code = Line::register_codes["PC"];
 			first |= code << REG1_OFF;
+
+			pcrel = true;
+
 			break;
 
 		}
@@ -1205,6 +1217,7 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 		arg2 = arg.front();
 		arg3 = arg.back();
 
+		// NOT REGDIR 1.
 		if (!regex_match(arg1, match, Line::regdir)){
 			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
 			mlog.error(error);
@@ -1215,7 +1228,7 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 		code = Line::register_codes[arg1];
 		first |= code << REG0_OFF;
 
-
+		// NOT REGDIR 2.
 		if (!regex_match(arg2, match, Line::regdir)){
 			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
 			mlog.error(error);
@@ -1226,7 +1239,7 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 		code = Line::register_codes[arg2];
 		first |= code << REG1_OFF;
 
-
+		// NOT REGDIR 3.
 		if (!regex_match(arg3, match, Line::regdir)){
 			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
 			mlog.error(error);
@@ -1246,40 +1259,114 @@ vector<uint8_t> Line::get_encoded_instruction(list<pair<string, int>> symbols, u
 	mlog.std("first = " + to_string(first));
 	mlog.std("second = " + to_string(second));
 
-	vector<uint8_t> v;
+	vector<unsigned char> v;
 
-	uint32_t mask = UINT8_MAX;
+	uint32_t mask = UCHAR_MAX;
 	for (int i = 0; i < 4; i++){
-		uint8_t x = (mask&first) >> (8 * i);
+		unsigned char x = first&mask;
 		v.push_back(x);
-		mask <<= 8;
+		first >>= 8;
 	}
 
 	if (use_second)
 	for (int i = 0; i < 4; i++){
-		uint8_t x = (mask&second) >> (8 * i);
+		unsigned char x = mask&second;
 		v.push_back(x);
-		mask <<= 8;
+		second >>= 8;
 	}
+
 
 	return v;
 
 }
 
 
-/*
-vector<string> Line::get_labels_in_instruction(){
+
+vector<string> Line::get_labels_in_instruction(list<pair<string, int>> symbols){
 	vector<string> ret;
 
-	while (true){
-		try{}
-		catch (string s){
-			
-		}
+	if (!has_instruction()){
+		string error = "get_labels_in_instruction called for a line that does not have an instruction.";
+		mlog.error(error);
+		throw error;
 	}
+
+	string left = "^(?:.*\\W)?";
+	string right = "(?:\\W.*)?$";
+
+	for (auto p : symbols){
+		regex has(left + p.first + right);
+		for (string arg : get_instruction_arguments())
+			if (regex_match(arg, has))
+				ret.push_back(p.first);
+	}
+
+	return ret;
 }
 
-*/
+vector<pair<string, int>> Line::get_labels_in_define_data(list<pair<string, int>> symbols, int pc){
+
+	if (!has_define_data()){
+		string error = "get_labels_in_define_data called for a line that does not have a define data directive.";
+		mlog.error(error);
+		throw error;
+	}
+
+
+	try{
+		vector<pair<string, int>> ret;
+
+		string name = get_directive_name();
+		int off = name == "DB" ? 1 : name == "DW" ? 2 : 4;
+
+
+		string left = "^(?:.*\\W)?";
+		string right = "(?:\\W.*)?$";
+
+		for (string arg : get_directive_arguments()){
+
+			regex DUP("^\\s*(.+)\\s+DUP\\s+(.+)\\s*$");
+			smatch match;
+
+			string a;
+			int rept;
+			if (regex_match(arg, match, DUP)){
+				a = match[2];
+				string num_of_repetitions = match[1];
+				rept = evaluate_expression(num_of_repetitions);
+			}
+			else{
+				a = arg;
+				rept = 1;
+			}
+
+			for (auto p : symbols){
+				regex has(left + p.first + right);
+
+				if (!regex_match(a, has))
+					continue;
+
+				for (int i = 0; i < rept; i++)
+					ret.push_back(make_pair(p.first, pc + i*off));
+			}
+
+			pc += rept*off;
+		}
+
+		return ret;
+
+	}
+	catch (string s){
+		string error = "Error in get_labels_in_define_data. Core is '" + get_core() + "'. " + s;
+		mlog.error(error);
+		throw error;
+	}
+
+
+
+}
+
+
 
 
 

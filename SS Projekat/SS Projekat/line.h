@@ -91,11 +91,13 @@ public:
 
 
 
-	vector<uint8_t> get_encoded_instruction(list<pair<string, int>>, uint32_t pc );
-	vector<string> get_labels_in_instruction();
+	vector<unsigned char> get_encoded_instruction(list<pair<string, int>>, uint32_t pc , bool& pcrel);
+	vector<string> get_labels_in_instruction(list<pair<string, int>>);
+
+	vector<pair<string, int>> get_labels_in_define_data(list<pair<string, int>> symbols, int pc);
 
 
-	vector<uint8_t> get_encoded_define_data_values();
+	vector<unsigned char> get_encoded_define_data_values();
 
 
 
@@ -142,10 +144,10 @@ private:
 	static regex instruction;
 	static regex ld_st_extension;
 
-	static unordered_map<string, uint8_t>  instruction_codes;
-	static unordered_map<string, uint8_t>  address_codes;
-	static unordered_map<string, uint8_t>  type_codes;
-	static unordered_map<string, uint8_t>  register_codes;
+	static unordered_map<string, unsigned char>  instruction_codes;
+	static unordered_map<string, unsigned char>  address_codes;
+	static unordered_map<string, unsigned char>  type_codes;
+	static unordered_map<string, unsigned char>  register_codes;
 
 
 	static int IPR(string s);
@@ -160,6 +162,8 @@ public:
 	string static replace_symbols(string str, list<pair<string, int>> symbols);
 
 	static int get_number(string str);
+
+	static bool has_pcrel(vector<unsigned char> data);
 
 };
 

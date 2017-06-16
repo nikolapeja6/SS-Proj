@@ -12,7 +12,7 @@ using namespace std;
 class ContentTable{
 
 	string section_name;
-	vector<uint8_t> data;
+	vector<unsigned  char> data;
 
 public:
 	
@@ -20,8 +20,8 @@ public:
 	ContentTable();
 	ContentTable(string name);
 
-	void append(vector<uint8_t>);
-	void append(list<uint8_t>);
+	void append(vector<unsigned char>);
+	void append(list<unsigned char>);
 
 	void set_section_name(string name);
 

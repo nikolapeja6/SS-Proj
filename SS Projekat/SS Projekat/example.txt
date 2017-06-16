@@ -1,5 +1,5 @@
 .data
-a: DD a+a+3
+a: DD a+3
 ORG 0x20
 .text
 LOAD R1, a    ; ucitava sadrzaj memorijske lokacije a u registar R1
