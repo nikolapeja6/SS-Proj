@@ -60,3 +60,7 @@ void RelocationTable::add_relative_entry(unsigned index, int offset){
 void RelocationTable::add_entry(char type, unsigned index, int offset){
 	entries.push_back(Entry(type, index, offset));
 }
+
+string RelocationTable::get_section_name(){
+	return section_name;
+}

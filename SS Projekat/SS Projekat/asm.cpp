@@ -258,7 +258,6 @@ string assemble(const string& path_to_source){
 						pc = 0;
 					ORG = next_ORG;
 					next_ORG = false;
-
 					con.empty();
 					reloc.empty();
 
@@ -285,8 +284,17 @@ string assemble(const string& path_to_source){
 				for (string s : relocation_symbols){
 					int index = symbol_table.get_index_of_symbol(s);
 
-					if (pcrel)
-						reloc.add_relative_entry(index, pc + 4);
+					if (pcrel){
+
+						string name = reloc.get_section_name();
+						int current_section_index = symbol_table.get_section_of_section(name); 
+						int label_section_index = symbol_table.get_section_of_symbol(s);
+
+						mlog.std("------------current_section index = " + to_string(current_section_index) + "; label_section index = " + to_string(label_section_index));
+
+						if (label_section_index != current_section_index)
+							reloc.add_relative_entry(index, pc + 4);
+					}
 					else
 						reloc.add_absolute_entry(index, pc + 4);
 				}

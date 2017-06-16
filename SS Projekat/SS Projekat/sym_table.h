@@ -72,6 +72,7 @@ public:
 	void set_symbol_to_absolute(string name);
 	void set_section_to_absolute(string name);
 
+	int get_section_of_section(string name);
 	
 
 	list<pair<string, int>> get_symbols();
@@ -81,6 +82,7 @@ public:
 	string str();
 
 	bool has_symbol(string name);
+
 
 
 

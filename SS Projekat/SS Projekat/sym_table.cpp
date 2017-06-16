@@ -212,6 +212,25 @@ int SymbolTable::get_section_of_symbol(string name){
 	return e.section;
 }
 
+int  SymbolTable::get_section_of_section(string name){
+	if (!has_entry(name)){
+		string error = "get_section_of_section encountered an error. Entry with name '" + name + " does not exist exist.";
+		mlog.error(error);
+		throw error;
+	}
+
+	Entry e = get_entry(name);
+
+	if (e.type != "SEG"){
+		string error = "get_section_of_section encountered an error. Entry with name '" + name + " is not a section entry.";
+		mlog.error(error);
+		throw error;
+	}
+
+	return e.section;
+}
+
+
 int SymbolTable::get_value_of_symbol(string name){
 	if (!has_entry(name)){
 		string error = "get_value_of_symbol encountered an error. Entry with name '" + name + " does not exist exist.";

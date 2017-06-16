@@ -48,6 +48,8 @@ public:
 	void empty();
 
 
+	string get_section_name();
+
 private:
 
 	void add_entry(char type, unsigned index, int offset);
