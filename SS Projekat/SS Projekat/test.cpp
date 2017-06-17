@@ -2,6 +2,9 @@
 #include "my_util.h"
 #include "asm.h"
 
+#include "sym_table.h"
+#include "reloc_table.h"
+#include "content_table.h"
 
 void test1(){
 	mlog.std("Log test");
@@ -589,6 +592,62 @@ void test27(){
 }
 
 
+
+// EMULATOR TESTS
+
+
+void test100(){
+	ifstream in;
+	in.open("obj_example.txt");
+
+	SymbolTable symbol_table;
+	RelocationTable reloc_table;
+	ContentTable content;
+
+	try{
+		in >> symbol_table;
+		cout << symbol_table << endl;
+
+
+		int x = in.peek();
+		while (x == '#'){
+			in >> reloc_table >> content;
+			cout << reloc_table << content << endl;
+			mlog.std(reloc_table.str());
+			mlog.std(content.str());
+			reloc_table.empty();
+			content.empty();
+			x = in.peek();
+		}
+
+		if (reloc_table.get_section_name() != ""){
+			cout << reloc_table << content << endl;
+			mlog.std(reloc_table.str());
+			mlog.std(content.str());
+		}
+
+
+
+	}
+	catch (string s){
+		cout << s << endl;
+	}
+
+}
+
+void test101(){
+	unsigned char mem[200];
+	for (int i = 0; i < 200; i++)
+		mem[i] = UCHAR_MAX;
+
+
+	load("obj_example.txt", mem, 200);
+
+
+	for (int i = 0; i < 200; i++)
+		cout << (int)mem[i] << " ";
+}
+
 int main(){
 	//test1();
 	//test2();
@@ -596,7 +655,8 @@ int main(){
 	//test3();
 	//test4();
 
-	test23();
+	test101();
 
+	return 0;
 	
 }

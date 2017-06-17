@@ -36,7 +36,7 @@ class SymbolTable{
 		string flags;
 
 		
-
+		Entry();
 		Entry(string t, int i, string n, int sec, int v);
 
 		string str();
@@ -83,7 +83,15 @@ public:
 
 	bool has_symbol(string name);
 
+	friend istream& operator>> (istream&, SymbolTable&);
 
+	friend istream& operator>> (istream&, Entry&);
+
+	friend void load(string path_to_obj, unsigned char* memory,  const unsigned MAX_SIZE);
+
+
+	static bool overlap(unsigned beginning, unsigned ending, vector<pair<unsigned, unsigned>>& occupance);
+	static pair<unsigned, unsigned> get_overlap(unsigned beginning, unsigned ending, vector<pair<unsigned, unsigned>>& occupance);
 
 
 private:
@@ -91,8 +99,11 @@ private:
 	Entry& get_entry(string name);
 	bool has_entry(string name);
 
+
 	void add_entry(string type, string name, int value, int section=-2);
 
+	void virtual_load_of_abs_sections(vector<pair<unsigned, unsigned>>&, const unsigned MAX_SIZE);
+	void virtual_load_of_rel_setions(vector<pair<unsigned, unsigned>>&, const unsigned MAX_SIZE);
 
 
 };

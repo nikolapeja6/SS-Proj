@@ -79,6 +79,7 @@
     <ClInclude Include="asm.h" />
     <ClInclude Include="content_table.h" />
     <ClInclude Include="line.h" />
+    <ClInclude Include="loader.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="my_util.h" />
     <ClInclude Include="reloc_table.h" />
@@ -88,6 +89,7 @@
     <ClCompile Include="asm.cpp" />
     <ClCompile Include="content_table.cpp" />
     <ClCompile Include="line.cpp" />
+    <ClCompile Include="loader.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="my_util.cpp" />
     <ClCompile Include="reloc_table.cpp" />
@@ -96,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="example.txt" />
+    <Text Include="obj_example.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

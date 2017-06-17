@@ -19,6 +19,7 @@ class RelocationTable{
 		// offset in the section for the destination
 		int offset;
 
+		Entry();
 		Entry(char _type, unsigned _index, int _offset);
 
 		string str();
@@ -49,6 +50,12 @@ public:
 
 
 	string get_section_name();
+
+	friend istream& operator>>(istream&, RelocationTable&);
+	friend istream& operator>>(istream&, Entry&);
+
+	friend void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE);
+
 
 private:
 

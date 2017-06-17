@@ -240,6 +240,10 @@ string assemble(const string& path_to_source){
 					con.append(data);
 
 					for (auto p : relocation_data){
+
+						if (symbol_table.get_section_of_symbol(p.first) == -1)
+							continue;
+
 						int index = symbol_table.get_index_of_symbol(p.first);
 						reloc.add_absolute_entry(index, p.second);
 					}
@@ -284,6 +288,9 @@ string assemble(const string& path_to_source){
 				for (string s : relocation_symbols){
 					int index = symbol_table.get_index_of_symbol(s);
 
+					if (symbol_table.get_section_of_symbol(s) == -1)
+						continue;
+
 					if (pcrel){
 
 						string name = reloc.get_section_name();
@@ -323,6 +330,8 @@ string assemble(const string& path_to_source){
 	if (!end)
 		output << reloc << con;
 
+	output << endl << "#end";
+
 
 	fin.close();
 
@@ -338,7 +347,7 @@ string assemble(const string& path_to_source){
 	mlog.std("\n\n\n***\n\n" + output.str());
 
 	ofstream out;
-	out.open(path_to_source+ ".obj");
+	out.open("obj_" + path_to_source);
 	out << output.str();
 	out.close();
 	
@@ -346,5 +355,5 @@ string assemble(const string& path_to_source){
 
 	mlog.std("assemble finished");
 
-	return path_to_source+".obj";
+	return "obj_"+path_to_source;
 }

@@ -1,6 +1,6 @@
 .data
 a: DD a+3
-ORG 0x20
+ORG 0x40
 .text
 LOAD R1, a    ; ucitava sadrzaj memorijske lokacije a u registar R1
 LOAD R2, #a ; ucitava adresu lokacije a u registar R2

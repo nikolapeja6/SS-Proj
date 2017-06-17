@@ -5,6 +5,7 @@
 
 using namespace std;
 
+SymbolTable::Entry::Entry(){}
 SymbolTable::Entry::Entry(string t, int i, string n, int sec, int v) :type(t), index(i), name(n), section(sec), value(v), flags("L"){}
 
 
@@ -326,3 +327,155 @@ void SymbolTable::set_section_to_absolute(string name){
 		throw error;
 	}
 }
+
+istream& operator>> (istream& in, SymbolTable::Entry& entry){
+	string type;
+	int index;
+	string name;
+	int section;
+	unsigned value;
+
+	unsigned size=0;
+
+	string flags;
+
+	in >> type;
+
+	if (type != "SYM" && type != "SEG")
+		throw "Error reading entry. Entry type is neither 'SYM' nor 'SEG', but '" + type + "'";
+
+	in>>index >> name >> section >> hex >> value;
+	
+	if (type == "SEG")
+		in >> hex >> size;
+
+	in >> flags;
+
+	if (flags != "G" && flags != "L")
+		throw "Error reading entry. Entry flags are neither 'G' nor 'L', but '" + flags + "'";
+
+	entry.type = type;
+	entry.index = index;
+	entry.name = name;
+	entry.section = section;
+	entry.value = value;
+	entry.size = size;
+	entry.flags = flags;
+
+
+	in >> dec;
+
+	return in;
+}
+
+
+istream& operator>>(istream& in, SymbolTable& table){
+	string line;
+	getline(in, line);
+
+	try{
+
+		if (line != "#TabelaSimbola")
+			throw "The first line is not '#TabelaSimbola'. Line is '"+line+"'.";
+
+		while (in.peek() != '#' && in.peek() != EOF){
+
+			mlog.std(to_string(in.peek()));
+			
+			SymbolTable::Entry e;
+			in >> e;
+			getline(in,line);
+			table.entries.push_back(e);
+
+		}
+
+		return in;
+		
+	}
+	catch (string s){
+		string error = "Error reading SymbolTable. " + s;
+		mlog.std(error);
+		throw error;
+	}
+
+}
+
+
+
+void SymbolTable::virtual_load_of_abs_sections(vector<pair<unsigned, unsigned>>& occupance, const unsigned MAX_SIZE){
+
+	for (Entry e:entries)
+		if (e.type == "SEG" && e.section == -1){
+			// ABSOLUTE SECTION
+
+			unsigned beginning = e.value;
+			unsigned ending = beginning + e.size;
+
+			if (overlap(beginning, ending, occupance)){
+				auto x = get_overlap(beginning, ending, occupance);
+				throw "Overlapping between two absolute sections - [" + to_string(beginning) + ", " + to_string(ending) + ") and ["+to_string(x.first)+", "+to_string(x.second)+").";
+			}
+
+			if (ending > MAX_SIZE || beginning > MAX_SIZE)
+				throw "Overflow - section [" + e.str() + "] goes over memory limit";
+
+			occupance.push_back(make_pair(beginning, ending));
+		}
+
+}
+
+void SymbolTable::virtual_load_of_rel_setions(vector<pair<unsigned, unsigned>>&occupance, const unsigned MAX_SIZE){
+
+	for (Entry& e:entries)
+		if (e.type == "SEG" && e.section != -1){
+			// RELATIVE SECTION
+
+			unsigned beginning = 0;
+			unsigned size = e.size;
+
+			try{
+				while (beginning + size < MAX_SIZE){
+					auto p = get_overlap(beginning, beginning+size, occupance);
+					beginning = p.second;
+				}
+
+				throw "no free space to fit section [" + e.str() + "]";
+			}
+
+			catch (string s){
+				if (s != "No overlap found")
+					throw;
+
+				occupance.push_back(make_pair(beginning, beginning + size));
+				
+				e.value = beginning;
+
+			}
+
+		}
+
+}
+
+
+bool SymbolTable::overlap(unsigned beginning, unsigned ending, vector<pair<unsigned, unsigned>>& occupance){
+	
+	for (auto p : occupance)
+		if ((p.first < ending  && p.first >=beginning)|| (p.second > beginning  && p.second < ending))
+			return true;
+
+	return false;
+
+}
+
+pair<unsigned, unsigned> SymbolTable::get_overlap(unsigned beginning, unsigned ending, vector<pair<unsigned, unsigned>>& occupance){
+
+	for (auto p : occupance)
+		if ((p.first < ending  && p.first >= beginning) || (p.second > beginning  && p.second < ending))
+			return p;
+	
+	string error = "No overlap found";
+	throw error;
+	
+
+}
+
