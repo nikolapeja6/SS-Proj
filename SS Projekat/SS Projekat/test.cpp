@@ -591,6 +591,10 @@ void test27(){
 	}
 }
 
+void test28(){
+	assemble("a.txt");
+}
+
 
 
 // EMULATOR TESTS
@@ -636,17 +640,67 @@ void test100(){
 }
 
 void test101(){
-	unsigned char mem[200];
-	for (int i = 0; i < 200; i++)
-		mem[i] = UCHAR_MAX;
+	
+	Memory mem;
 
 
-	load("obj_example.txt", mem, 200);
+	load("obj_example.txt", mem);
 
 
-	for (int i = 0; i < 200; i++)
-		cout << (int)mem[i] << " ";
+	cout << mem.str() << endl;
 }
+
+void test102(){
+	Context con;
+
+	for (int i = 0; i < 10; i++){
+		con.interrupts[Context::TIMER_ENTRY] = false;
+		while (!con.interrupts[Context::TIMER_ENTRY]);		
+		cout << "ok" << endl;
+	}
+
+	cout << "done" << endl;
+}
+
+void test103(){
+	Context con;
+
+	string in;
+
+	for (int i = 0; i < 10; i++){
+		while (con.new_read);
+
+		in = in +char(int(con.mem[Context::INPUT_ADDRESS]));
+		con.new_read = true;
+
+	}
+
+	cout << in << endl;
+
+	cout << "done" << endl;
+}
+
+#include "emulator.h"
+
+
+void test104(){
+
+	Context c;
+	try{
+
+		uint32_t START = load("obj_a.txt", c.mem);
+
+		c.PC = START;
+		c.SP = 1000;
+
+		c.execute();
+	}
+	catch (string s){
+		cout << s << endl;
+	}
+}
+
+
 
 int main(){
 	//test1();
@@ -655,7 +709,10 @@ int main(){
 	//test3();
 	//test4();
 
-	test101();
+	//test103();
+
+	test28();
+	test104();
 
 	return 0;
 	

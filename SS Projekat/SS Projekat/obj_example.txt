@@ -2,7 +2,8 @@
 SEG 1 .data 1 0x0 0x4 L
 SYM 2 a 1 0x0 L
 SEG 3 .text -1 0x40 0x68 L
-SYM 4 x -1 0x58 L
+SYM 4 START -1 0x40 L
+SYM 5 x -1 0x58 L
 #rel.data
 A 2 0
 .data

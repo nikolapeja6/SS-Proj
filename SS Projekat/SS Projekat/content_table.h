@@ -9,6 +9,9 @@
 
 using namespace std;
 
+#include "emulator.h"
+
+
 class ContentTable{
 
 	string section_name;
@@ -33,7 +36,7 @@ public:
 
 	string str()const;
 
-	friend void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE);
+	friend unsigned load(string path_to_obj, Memory& mem);
 
 
 };

@@ -2,6 +2,7 @@
 #include "my_util.h"
 #include <sstream>
 #include <climits>
+#include <regex>
 
 using namespace std;
 
@@ -75,7 +76,28 @@ void SymbolTable::add_entry(string type, string name, int value, int section){
 	int index = entries.size()+1;
 	if (type == "SEG")
 		section = index;
+
 	entries.push_back(Entry(type, index, name, section ,value));
+
+	if (type == "SEG"){
+
+		regex type("^(\\.(?:data|rodata|text|bss)).*$");
+		smatch m;
+		regex_match(name, m, type);
+
+		string flags = "";
+
+		string t = m[1];
+		if (t == ".data")
+			flags = "RW"; // data
+		else if (t == ".text")
+			flags = "X"; // text
+		else if (t == ".rodata")
+			flags = "R"; // rodata
+		else flags = "RW"; // bss
+
+		get_entry(name).flags = flags;
+	}
 }
 
 void SymbolTable::add_section_entry(string name, int address){
@@ -290,7 +312,7 @@ bool SymbolTable::has_symbol(string name){
 }
 
 void SymbolTable::add_external_symbol(string name){
-	add_entry("SYM", name, INT_MAX, 0);
+	add_entry("SYM", name, 0, 0);
 	set_symbol_to_global(name);
 }
 
@@ -351,8 +373,6 @@ istream& operator>> (istream& in, SymbolTable::Entry& entry){
 
 	in >> flags;
 
-	if (flags != "G" && flags != "L")
-		throw "Error reading entry. Entry flags are neither 'G' nor 'L', but '" + flags + "'";
 
 	entry.type = type;
 	entry.index = index;

@@ -1,4 +1,706 @@
+assemble started with a.txt
+line is '.data; pc = 0; new pc = 0
+---replace_symbols called. Original core is 'DD 2'
+line 'DD 2'
+new line 'DD 2'
++++replace_symbol finished. New core is 'DD 2'
+num 2 is 2; value is 2
+line is 'DD 2; pc = 0; new pc = 4
+---replace_symbols called. Original core is 'simb DEF 0x5'
+line 'simb DEF 0x5'
+new line 'simb DEF 0x5'
++++replace_symbol finished. New core is 'simb DEF 0x5'
+num 0x5 is 5; value is 5
+line is 'simb DEF 0x5; pc = 4; new pc = 4
+---replace_symbols called. Original core is 'c DEF 5+(3+(6*3))+simb'
+replcaing 'simb'. src = 'c DEF 5+(3+(6*3))+simb' => dst = 'c DEF 5+(3+(6*3))+5'
+line 'h: c DEF 5+(3+(6*3))+simb'
+new line 'h: c DEF 5+(3+(6*3))+5'
++++replace_symbol finished. New core is 'c DEF 5+(3+(6*3))+5'
+num 5 is 5; value is 5
+num 3 is 3; value is 3
+num 6 is 6; value is 6
+num 3 is 3; value is 3
+num 5 is 5; value is 5
+line is 'h: c DEF 5+(3+(6*3))+5; pc = 4; new pc = 4
+---replace_symbols called. Original core is 'DD 4'
+line 'DD 4'
+new line 'DD 4'
++++replace_symbol finished. New core is 'DD 4'
+num 4 is 4; value is 4
+line is 'DD 4; pc = 4; new pc = 8
+---replace_symbols called. Original core is 'DD a'
+replcaing 'a'. src = 'DD a' => dst = 'DD 8'
+line 'a: DD a'
+new line 'a: DD 8'
++++replace_symbol finished. New core is 'DD 8'
+num 8 is 8; value is 8
+line is 'a: DD 8; pc = 8; new pc = 12
+---replace_symbols called. Original core is 'DD h'
+replcaing 'h'. src = 'DD h' => dst = 'DD 4'
+line 'DD h'
+new line 'DD 4'
++++replace_symbol finished. New core is 'DD 4'
+num 4 is 4; value is 4
+line is 'DD 4; pc = 12; new pc = 16
+size of section '.data' is set to 16
+---replace_symbols called. Original core is 'ORG 0x50'
+line 'ORG 0x50'
+new line 'ORG 0x50'
++++replace_symbol finished. New core is 'ORG 0x50'
+*0x50*
+num 0x50 is 80; value is 50
+line is 'ORG 0x50; pc = 80; new pc = 80
+line is '.text; pc = 80; new pc = 80
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'a ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'START: LOAD R1, a ;dobro kodirana 0; pc = 80; new pc = 88
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '#a ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'LOADUW R2, #a ;dobro kodirana  8; pc = 88; new pc = 96
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '$a ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'LOADSB R3, $a ;dobro kodirana 16; pc = 96; new pc = 104
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'x ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'x: JZ R1, x ;lose kodirana 24; pc = 104; new pc = 112
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '$x  ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'JLZ R1, $x  ;dobro kodirana 32; pc = 112; new pc = 120
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'LOAD SP, [R3] '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'LOAD SP, [R3] ;lose kodirana 40; pc = 120; new pc = 124
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '[R0+5] ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'STORE PC, [R0+5] ;dobro kodirana 44; pc = 124; new pc = 132
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'x ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'STOREB R1, x ;dobro kodirana 52; pc = 132; new pc = 140
+line is '.global a; pc = 140; new pc = 140
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'ADD R4, R3, R2 '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'ADD R4, R3, R2 ;dobro kodirana 60; pc = 140; new pc = 144
+---replace_symbols called. Original core is 'DD 0x70180430 '
+line 'DD 0x70180430 ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64'
+new line 'DD 0x70180430  ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64'
++++replace_symbol finished. New core is 'DD 0x70180430 '
+num 0x70180430 is 1880622128; value is 70180430
+line is 'DD 0x70180430  ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64; pc = 144; new pc = 148
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'NOT R1, R2 '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'NOT R1, R2 ;dobro kodirana 68; pc = 148; new pc = 152
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'PUSH R15 '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'PUSH R15 ;72; pc = 152; new pc = 156
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'POP R5 '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'POP R5 ;76; pc = 156; new pc = 160
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'ispis ' is not REGDIR or REGIND, so size is 8B
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'CALL ispis ;80; pc = 160; new pc = 168
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'INT R0 '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'INT R0 ;88; pc = 168; new pc = 172
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'RET '
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'kraj: RET ;92; pc = 172; new pc = 176
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';96; pc = 176; new pc = 176
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';ne treba da prodje - instrukcije sa greskom; pc = 176; new pc = 176
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';CALL nepostoji; pc = 176; new pc = 176
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';ADD R1,R4; pc = 176; new pc = 176
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';NOT R1, R3 , R7; pc = 176; new pc = 176
+size of section '.text' is set to 176
+line is '.bss.3; pc = 0; new pc = 0
+line is '.global x; pc = 0; new pc = 0
+---replace_symbols called. Original core is 'DD 4 DUP ?'
+line 'polje: DD 4 DUP ?'
+new line 'polje: DD 4 DUP ?'
++++replace_symbol finished. New core is 'DD 4 DUP ?'
+num 4 is 4; value is 4
+num ? is 0; value is ?
+line is 'polje: DD 4 DUP ?; pc = 0; new pc = 16
+size of section '.bss.3' is set to 16
+line is '.rodata; pc = 0; new pc = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'ispis:; pc = 0; new pc = 0
+---replace_symbols called. Original core is 'DD 0xfff'
+line 'DD 0xfff'
+new line 'DD 0xfff'
++++replace_symbol finished. New core is 'DD 0xfff'
+num 0xfff is 4095; value is fff
+line is 'DD 0xfff; pc = 0; new pc = 4
+size of section '.rodata' is set to 4
+Table after first pass - #TabelaSimbola
+SEG 1 .data 1 0x0 0x10 RW
+SYM 2 h 1 0x4 L
+SYM 3 a 1 0x8 L
+SEG 4 .text -1 0x50 0xb0 X
+SYM 5 START -1 0x50 L
+SYM 6 x -1 0x68 L
+SYM 7 kraj -1 0xac L
+SEG 8 .bss.3 8 0x0 0x10 RW
+SYM 9 polje 8 0x0 L
+SEG 10 .rodata 10 0x0 0x4 R
+SYM 11 ispis 10 0x0 L
+
+Table after global - #TabelaSimbola
+SEG 1 .data 1 0x0 0x10 RW
+SYM 2 h 1 0x4 L
+SYM 3 a 1 0x8 L
+SEG 4 .text -1 0x50 0xb0 X
+SYM 5 START -1 0x50 L
+SYM 6 x -1 0x68 L
+SYM 7 kraj -1 0xac L
+SEG 8 .bss.3 8 0x0 0x10 RW
+SYM 9 polje 8 0x0 L
+SEG 10 .rodata 10 0x0 0x4 R
+SYM 11 ispis 10 0x0 L
+
+line is '.data; pc = 0; new pc = 0
+---replace_symbols called. Original core is 'DD 2'
+line 'DD 2'
+new line 'DD 2'
++++replace_symbol finished. New core is 'DD 2'
+num 2 is 2; value is 2
+num 2 is 2; value is 2
+num 2 is 2; value is 2
+l.size = 1
+0B from 2 is 2
+1B from 2 is 0
+2B from 2 is 0
+3B from 2 is 0
+line is 'DD 2; pc = 0; new pc = 4
+line is 'simb DEF 0x5; pc = 4; new pc = 4
+line is 'h: c DEF 5+(3+(6*3))+simb; pc = 4; new pc = 4
+---replace_symbols called. Original core is 'DD 4'
+line 'DD 4'
+new line 'DD 4'
++++replace_symbol finished. New core is 'DD 4'
+num 4 is 4; value is 4
+num 4 is 4; value is 4
+num 4 is 4; value is 4
+l.size = 1
+0B from 4 is 4
+1B from 4 is 0
+2B from 4 is 0
+3B from 4 is 0
+line is 'DD 4; pc = 4; new pc = 8
+---replace_symbols called. Original core is 'DD a'
+replcaing 'a'. src = 'DD a' => dst = 'DD 8'
+line 'a: DD a'
+new line 'a: DD 8'
++++replace_symbol finished. New core is 'DD 8'
+num 8 is 8; value is 8
+num 8 is 8; value is 8
+num 8 is 8; value is 8
+l.size = 1
+0B from 8 is 8
+1B from 8 is 0
+2B from 8 is 0
+3B from 8 is 0
+line is 'a: DD 8; pc = 8; new pc = 12
+---replace_symbols called. Original core is 'DD h'
+replcaing 'h'. src = 'DD h' => dst = 'DD 4'
+line 'DD h'
+new line 'DD 4'
++++replace_symbol finished. New core is 'DD 4'
+num 4 is 4; value is 4
+num 4 is 4; value is 4
+num 4 is 4; value is 4
+l.size = 1
+0B from 4 is 4
+1B from 4 is 0
+2B from 4 is 0
+3B from 4 is 0
+line is 'DD 4; pc = 12; new pc = 16
+line is 'ORG 0x50; pc = 16; new pc = 16
+line is '.text; pc = 0; new pc = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'a ' is not REGDIR or REGIND, so size is 8B
+instruction code = 16
+LOAD, STORE
+arg1 = 'R1'
+type fot ld_st is ''
+replcaing 'a'. src = 'a ' => dst = '8 '
+num 8 is 8; value is 8
+core = LOAD R1, a 
+first = 281083904
+second = 8
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'START: LOAD R1, a ;dobro kodirana 0; pc = 0; new pc = 8
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '#a ' is not REGDIR or REGIND, so size is 8B
+instruction code = 16
+LOAD, STORE
+arg1 = 'R2'
+type fot ld_st is 'UW'
+replcaing 'a'. src = 'a ' => dst = '8 '
+num 8 is 8; value is 8
+core = LOADUW R2, #a 
+first = 276955144
+second = 8
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'LOADUW R2, #a ;dobro kodirana  8; pc = 8; new pc = 16
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '$a ' is not REGDIR or REGIND, so size is 8B
+instruction code = 16
+LOAD, STORE
+arg1 = 'R3'
+type fot ld_st is 'SB'
+replcaing 'a'. src = 'a' => dst = '8'
+num 8 is 8; value is 8
+core = LOADSB R3, $a 
+first = 283347000
+second = 4294967288
+------------current_section index = -1; label_section index = 1
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'LOADSB R3, $a ;dobro kodirana 16; pc = 16; new pc = 24
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'x ' is not REGDIR or REGIND, so size is 8B
+instruction code = 4
+JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ 
+replcaing 'x'. src = 'x ' => dst = '104 '
+104 
+num 104 is 104; value is 104
+core = JZ R1, x 
+first = 79757312
+second = 104
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'x: JZ R1, x ;lose kodirana 24; pc = 24; new pc = 32
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '$x  ' is not REGDIR or REGIND, so size is 8B
+instruction code = 8
+JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ 
+replcaing 'x'. src = 'x' => dst = '104'
+num 104 is 104; value is 104
+core = JLZ R1, $x  
+first = 148998144
+second = 72
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'JLZ R1, $x  ;dobro kodirana 32; pc = 32; new pc = 40
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'LOAD SP, [R3] '
+instruction code = 16
+LOAD, STORE
+arg1 = 'SP'
+type fot ld_st is ''
+core = LOAD SP, [R3] 
+first = 273684480
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'LOAD SP, [R3] ;lose kodirana 40; pc = 40; new pc = 44
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument '[R0+5] ' is not REGDIR or REGIND, so size is 8B
+instruction code = 17
+LOAD, STORE
+arg1 = 'PC'
+type fot ld_st is ''
+num 5 is 5; value is 5
+core = STORE PC, [R0+5] 
+first = 301006848
+second = 5
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'STORE PC, [R0+5] ;dobro kodirana 44; pc = 44; new pc = 52
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'x ' is not REGDIR or REGIND, so size is 8B
+instruction code = 17
+LOAD, STORE
+arg1 = 'R1'
+type fot ld_st is ''
+replcaing 'x'. src = 'x ' => dst = '104 '
+num 104 is 104; value is 104
+core = STOREB R1, x 
+first = 297861120
+second = 104
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'STOREB R1, x ;dobro kodirana 52; pc = 52; new pc = 60
+line is '.global a; pc = 60; new pc = 60
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'ADD R4, R3, R2 '
+instruction code = 48
+ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR
+core = ADD R4, R3, R2 
+first = 805574784
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'ADD R4, R3, R2 ;dobro kodirana 60; pc = 60; new pc = 64
+---replace_symbols called. Original core is 'DD 0x70180430 '
+line 'DD 0x70180430 ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64'
+new line 'DD 0x70180430  ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64'
++++replace_symbol finished. New core is 'DD 0x70180430 '
+num 0x70180430 is 1880622128; value is 70180430
+num 0x70180430 is 1880622128; value is 70180430
+num 0x70180430 is 1880622128; value is 70180430
+l.size = 1
+0B from 1880622128 is 48
+1B from 1880622128 is 4
+2B from 1880622128 is 24
+3B from 1880622128 is 112
+line is 'DD 0x70180430  ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64; pc = 64; new pc = 68
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'NOT R1, R2 '
+instruction code = 56
+ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR
+core = NOT R1, R2 
+first = 939593728
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'NOT R1, R2 ;dobro kodirana 68; pc = 68; new pc = 72
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'PUSH R15 '
+instruction code = 32
+PUSH, POP
+core = PUSH R15 
+first = 537853952
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'PUSH R15 ;72; pc = 72; new pc = 76
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'POP R5 '
+instruction code = 33
+PUSH, POP
+core = POP R5 
+first = 553975808
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'POP R5 ;76; pc = 76; new pc = 80
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - argument 'ispis ' is not REGDIR or REGIND, so size is 8B
+instruction code = 3
+JMP, CALL
+replcaing 'ispis'. src = 'ispis ' => dst = '0 '
+---0 
+num 0 is 0; value is 0
+core = CALL ispis 
+first = 62914560
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'CALL ispis ;80; pc = 80; new pc = 88
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'INT R0 '
+instruction code = 0
+INT
+core = INT R0 
+first = 0
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'INT R0 ;88; pc = 88; new pc = 92
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+get_size_of_instruction - every argument is REGDIR or REGIND, so size is 4B. Instruction is 'RET '
+instruction code = 1
+RET
+core = RET 
+first = 16777216
+second = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'kraj: RET ;92; pc = 92; new pc = 96
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';96; pc = 96; new pc = 96
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';ne treba da prodje - instrukcije sa greskom; pc = 96; new pc = 96
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';CALL nepostoji; pc = 96; new pc = 96
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';ADD R1,R4; pc = 96; new pc = 96
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is ';NOT R1, R3 , R7; pc = 96; new pc = 96
+line is '.bss.3; pc = 0; new pc = 0
+line is '.global x; pc = 0; new pc = 0
+num 4 is 4; value is 4
+---replace_symbols called. Original core is 'DD 4 DUP ?'
+line 'polje: DD 4 DUP ?'
+new line 'polje: DD 4 DUP ?'
++++replace_symbol finished. New core is 'DD 4 DUP ?'
+num 4 is 4; value is 4
+num ? is 0; value is ?
+num 4 is 4; value is 4
+num ? is 0; value is ?
+num 4 is 4; value is 4
+num ? is 0; value is ?
+l.size = 4
+0B from 0 is 0
+1B from 0 is 0
+2B from 0 is 0
+3B from 0 is 0
+0B from 0 is 0
+1B from 0 is 0
+2B from 0 is 0
+3B from 0 is 0
+0B from 0 is 0
+1B from 0 is 0
+2B from 0 is 0
+3B from 0 is 0
+0B from 0 is 0
+1B from 0 is 0
+2B from 0 is 0
+3B from 0 is 0
+line is 'polje: DD 4 DUP ?; pc = 0; new pc = 16
+line is '.rodata; pc = 0; new pc = 0
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+Line does not contain a directive, but get_directive_name was called
+^^^OK, not an errror
+line is 'ispis:; pc = 0; new pc = 0
+---replace_symbols called. Original core is 'DD 0xfff'
+line 'DD 0xfff'
+new line 'DD 0xfff'
++++replace_symbol finished. New core is 'DD 0xfff'
+num 0xfff is 4095; value is fff
+num 0xfff is 4095; value is fff
+num 0xfff is 4095; value is fff
+l.size = 1
+0B from 4095 is 255
+1B from 4095 is 15
+2B from 4095 is 0
+3B from 4095 is 0
+line is 'DD 0xfff; pc = 0; new pc = 4
+
+
+
+***
+
+#TabelaSimbola
+SEG 1 .data 1 0x0 0x10 RW
+SYM 2 h 1 0x4 L
+SYM 3 a 1 0x8 L
+SEG 4 .text -1 0x50 0xb0 X
+SYM 5 START -1 0x50 L
+SYM 6 x -1 0x68 L
+SYM 7 kraj -1 0xac L
+SEG 8 .bss.3 8 0x0 0x10 RW
+SYM 9 polje 8 0x0 L
+SEG 10 .rodata 10 0x0 0x4 R
+SYM 11 ispis 10 0x0 L
+#rel.data
+8 A 3
+12 A 2
+.data
+0x02 0x00 0x00 0x00 0x04 0x00 0x00 0x00 0x08 0x00 0x00 0x00 0x04 0x00 0x00 0x00 
+#rel.text
+4 A 3
+12 A 3
+20 R 3
+84 A 11
+.text
+0x00 0x00 0xc1 0x10 0x08 0x00 0x00 0x00 0x08 0x00 0x82 0x10 0x08 0x00 0x00 0x00 
+0x38 0x88 0xe3 0x10 0xf8 0xff 0xff 0xff 0x00 0x00 0xc1 0x04 0x68 0x00 0x00 0x00 
+0x00 0x88 0xe1 0x08 0x48 0x00 0x00 0x00 0x00 0x18 0x50 0x10 0x00 0x00 0xf1 0x11 
+0x05 0x00 0x00 0x00 0x00 0x00 0xc1 0x11 0x68 0x00 0x00 0x00 0x80 0x18 0x04 0x30 
+0x30 0x04 0x18 0x70 0x00 0x10 0x01 0x38 0x00 0x00 0x0f 0x20 0x00 0x00 0x05 0x21 
+0x00 0x00 0xc0 0x03 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x01 
+#rel.bss.3
+.bss.3
+0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+#rel.rodata
+.rodata
+0xff 0x0f 0x00 0x00 
+#end
+assemble finished
 started load
+83
+83
+83
+83
+83
+83
+83
 83
 83
 83
@@ -6,27 +708,61 @@ started load
 next char after relocation table is '46
 next_char after content table = '35'
 #rel.data
-A 2 0
+8 A 3
+12 A 2
 
 .data
-0x03 0x00 0x00 0x00 
+0x02 0x00 0x00 0x00 0x04 0x00 0x00 0x00 0x08 0x00 0x00 0x00 0x04 0x00 0x00 0x00 
 next char after relocation table is '46
 next_char after content table = '35'
 #rel.text
-A 2 4
-A 2 12
-R 2 20
+4 A 3
+12 A 3
+20 R 3
+84 A 11
 
 .text
-0x00 0x00 0xc1 0x10 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
-0x00 0x88 0xe3 0x10 0xf0 0xff 0xff 0xff 0x00 0x00 0xc0 0x04 0x58 0x00 0x00 0x00 
-0x00 0x88 0xe0 0x04 0x38 0x00 0x00 0x00 
+0x00 0x00 0xc1 0x10 0x08 0x00 0x00 0x00 0x08 0x00 0x82 0x10 0x08 0x00 0x00 0x00 
+0x38 0x88 0xe3 0x10 0xf8 0xff 0xff 0xff 0x00 0x00 0xc1 0x04 0x68 0x00 0x00 0x00 
+0x00 0x88 0xe1 0x08 0x48 0x00 0x00 0x00 0x00 0x18 0x50 0x10 0x00 0x00 0xf1 0x11 
+0x05 0x00 0x00 0x00 0x00 0x00 0xc1 0x11 0x68 0x00 0x00 0x00 0x80 0x18 0x04 0x30 
+0x30 0x04 0x18 0x70 0x00 0x10 0x01 0x38 0x00 0x00 0x0f 0x20 0x00 0x00 0x05 0x21 
+0x00 0x00 0xc0 0x03 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x01 
+next char after relocation table is '46
+next_char after content table = '35'
+#rel.bss.3
+
+.bss.3
+0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+next char after relocation table is '46
+next_char after content table = '35'
+#rel.rodata
+
+.rodata
+0xff 0x0f 0x00 0x00 
 Error reading RelocationTable. First line does not match fpormat '#rel.<section_name>'. Line is '#end'
 ^^^OK, handeled
-finished reading obj file. Read 2sections.
+finished reading obj file. Read 4sections.
 occupance
 0 - 40
-64 - 168
-40 - 44
+80 - 256
+40 - 56
+56 - 72
+72 - 76
 
 relocating section '.data'
+finishd .data
+relocating section '.rodata'
+finishd .rodata
+relocating section '.text'
+finishd .text
+relocating section '.bss.3'
+finishd .bss.3
+finished loading
+execute started
+LOAD, STORE
+LOAD, STORE
+LOAD, STORE
+JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ 
+JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ 
+LOAD, STORE

@@ -3,8 +3,11 @@
 
 #include <string>
 
+#include "emulator.h"
+
+
 using namespace std;
 
-void load(string path_to_obj, unsigned char* memory,const unsigned MAX_SIZE);
+unsigned load(string path_to_obj, Memory& mem);
 
 #endif

@@ -17,7 +17,7 @@ void RelocationTable::set_section_name(string name){
 string RelocationTable::Entry::str(){
 	stringstream out;
 
-	out << type << " " << index << " " << offset;
+	out << offset << " " << type << " " << index;
 
 	return out.str();
 }
@@ -29,7 +29,7 @@ void RelocationTable::empty(){
 
 
 ostream& operator<<(ostream& out, const RelocationTable::Entry& e){
-	return out << e.type << " " << e.index << " " << e.offset;
+	return out << e.offset << " " << e.type << " " << e.index;
 }
 
 RelocationTable::RelocationTable(string name) :section_name(name){}
@@ -114,11 +114,13 @@ istream& operator>>(istream& in, RelocationTable::Entry& entry){
 	unsigned index;
 	int offset;
 
+
+	in >> offset;
 	in >> type;
 	if (type != 'A' && type != 'R')
 		throw "Error reaing entry. Type was not 'A' or 'R', but '" + type + '\'';
 
-	in >> index >> offset;
+	in >> index;
 
 	entry.index = index;
 	entry.offset = offset;

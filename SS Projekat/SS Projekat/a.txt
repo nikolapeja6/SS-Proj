@@ -1,0 +1,46 @@
+.data
+
+DD 2
+simb DEF 0x5
+h: c DEF 5+(3+(6*3))+simb
+DD 4
+a: DD a
+DD h
+
+
+ORG 0x50
+.text
+START: LOAD R1, a ;dobro kodirana 0
+LOADUW R2, #a ;dobro kodirana  8
+LOADSB R3, $a ;dobro kodirana 16
+x: JZ R1, x ;lose kodirana 24
+JLZ R1, $x  ;dobro kodirana 32
+LOAD SP, [R3] ;lose kodirana 40
+STORE PC, [R0+5] ;dobro kodirana 44
+STOREB R1, x ;dobro kodirana 52
+.global a
+ADD R4, R3, R2 ;dobro kodirana 60
+DD 0x70180430 ; daje ekvivalentan kod kao prethodna ADD instrukcija - dobro kodirana 64
+NOT R1, R2 ;dobro kodirana 68
+PUSH R15 ;72
+POP R5 ;76
+CALL ispis ;80
+INT R0 ;88
+kraj: RET ;92
+
+;96
+
+;ne treba da prodje - instrukcije sa greskom
+;CALL nepostoji
+;ADD R1,R4
+;NOT R1, R3 , R7
+
+
+.bss.3
+.global x
+polje: DD 4 DUP ?
+.rodata
+ispis:
+DD 0xfff
+.end
+

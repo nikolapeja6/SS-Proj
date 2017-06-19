@@ -56,7 +56,7 @@ string ContentTable::str()const{
 
 istream& operator>>(istream& in, ContentTable& table){
 
-	regex first_line("^\\.\\w+$");
+	regex first_line("^\\.\\w+(\\.\\d+)?$");
 
 	string line;
 	getline(in, line);

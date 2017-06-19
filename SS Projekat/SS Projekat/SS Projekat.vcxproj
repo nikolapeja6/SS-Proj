@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClInclude Include="asm.h" />
     <ClInclude Include="content_table.h" />
+    <ClInclude Include="emulator.h" />
     <ClInclude Include="line.h" />
     <ClInclude Include="loader.h" />
     <ClInclude Include="log.h" />
@@ -88,6 +89,7 @@
   <ItemGroup>
     <ClCompile Include="asm.cpp" />
     <ClCompile Include="content_table.cpp" />
+    <ClCompile Include="emulator.cpp" />
     <ClCompile Include="line.cpp" />
     <ClCompile Include="loader.cpp" />
     <ClCompile Include="log.cpp" />
@@ -97,7 +99,9 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="a.txt" />
     <Text Include="example.txt" />
+    <Text Include="obj_a.txt" />
     <Text Include="obj_example.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

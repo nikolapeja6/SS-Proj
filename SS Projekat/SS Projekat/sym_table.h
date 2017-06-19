@@ -5,6 +5,8 @@
 #include <vector>
 #include <list>
 
+#include "emulator.h"
+
 
 
 using namespace std;
@@ -87,7 +89,7 @@ public:
 
 	friend istream& operator>> (istream&, Entry&);
 
-	friend void load(string path_to_obj, unsigned char* memory,  const unsigned MAX_SIZE);
+	friend unsigned load(string path_to_obj, Memory& mem );
 
 
 	static bool overlap(unsigned beginning, unsigned ending, vector<pair<unsigned, unsigned>>& occupance);

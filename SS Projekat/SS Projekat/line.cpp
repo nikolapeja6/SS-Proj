@@ -55,7 +55,7 @@ string Line::reg = "R(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)|PC|SP";
 regex Line::immed("^#(.*)$");
 regex Line::regdir("^\\s*("+Line::reg+")\\s*$");
 regex Line::regind("^\s*\\[\\s*("+Line::reg+")\\s*\\]\\s*$");
-regex Line::regindoff("^\\s*\\[\\s*(" + Line::reg + ")\\s*\\+\\s*(.*)\\s*\\]$");
+regex Line::regindoff("^\\s*\\[\\s*(" + Line::reg + ")\\s*\\+\\s*(.*)\\s*\\]\\s*$");
 regex Line::pcrel("^\\s*\\$\\s*(\\w+)\\s*$");
 
 
@@ -254,8 +254,15 @@ string Line::get_instruction_name(){
 	smatch match;
 	string core = get_core();
 
-	if (regex_match(core, match, Line::instruction))
-		return match[1];
+	if (regex_match(core, match, Line::instruction)){
+
+		regex ld_st("^(LOAD|STORE).*$");
+		string name = match[1];
+		if (regex_match(name, match, ld_st))
+			return match[1];
+		else
+			return name;
+	}
 
 	string error = "Line does not contain an instruction, but get_directive was called. Line is '" + get_line() + "'";
 	mlog.error(error);
@@ -1065,7 +1072,8 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 		mlog.std("type fot ld_st is '" + arg2 + "'");
 		first |= Line::type_codes[arg2] << TYPE_OFF;
 
-		
+
+	
 
 		// REGIND 2.
 		if (regex_match(arg.back(), match, Line::regind)){
@@ -1125,12 +1133,28 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 
 		}
 
+		/*
 		// REGDIR 2.
 		if (regex_match(arg.back(), match, Line::regdir)){
 			arg1 = match[1];
 			first |= Line::register_codes[arg1] << REG1_OFF;
 
 			break;
+		}
+		*/
+
+		// REGDIR 2.
+		if (regex_match(arg.back(), match, Line::regdir)){
+
+			arg2 = match[1];
+			code = Line::register_codes[arg2];
+			first |= code << REG1_OFF;
+
+			code = Line::address_codes["regdir"];
+			first |= code << ADDRMODE_OFF;
+
+			break;
+
 		}
 
 		// IMMED 2.
@@ -1141,7 +1165,7 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 				throw error;
 			}
 
-			first = Line::address_codes["immmed"] << ADDRMODE_OFF;
+			first |= Line::address_codes["immed"] << ADDRMODE_OFF;
 
 			arg2 = match[1];
 
@@ -1206,7 +1230,7 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 		mlog.std("ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR");
 
 
-		if (arg.size() != 3){
+		if ((arg.size() != 3 && instruction_code != 0x38) ||(instruction_code == 0x38 && arg.size() !=2)){
 			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have 3 arguments. Found " + to_string(arg.size()) + ". Core is '" + core + "'";
 			mlog.error(error);
 			throw error;
@@ -1215,7 +1239,8 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 		arg1 = arg.front();
 		arg.pop_front();
 		arg2 = arg.front();
-		arg3 = arg.back();
+		if (instruction_code != 0x38)
+			arg3 = arg.back();
 
 		// NOT REGDIR 1.
 		if (!regex_match(arg1, match, Line::regdir)){
@@ -1240,19 +1265,25 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 		first |= code << REG1_OFF;
 
 		// NOT REGDIR 3.
-		if (!regex_match(arg3, match, Line::regdir)){
-			error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
-			mlog.error(error);
-			throw error;
-		}
+		if (instruction_code != 0x38){
+			if (!regex_match(arg3, match, Line::regdir)){
+				error = "Instruction format error. ADD, SUB, MUL, DIV, MOD, AND, OR, XOR, NOT, ASL, ASR must have REGDIR arguments. Core is '" + core + "'";
+				mlog.error(error);
+				throw error;
+			}
 
-		arg3 = match[1];
-		code = Line::register_codes[arg3];
-		first |= code << REG2_OFF;
+			arg3 = match[1];
+			code = Line::register_codes[arg3];
+			first |= code << REG2_OFF;
+		}
 	
 		break;
 
+	default:
 
+		error = "UNKNOWN INSTRUCTION - core is '"+core+"', instruction name is '"+get_instruction_name()+"'";
+		mlog.error(error);
+		throw error;
 	}
 
 	mlog.std("core = " + core);

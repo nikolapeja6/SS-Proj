@@ -4,6 +4,9 @@
 #include <iostream>
 #include <vector>
 
+#include "emulator.h"
+
+
 using namespace std;
 
 class RelocationTable{
@@ -54,7 +57,7 @@ public:
 	friend istream& operator>>(istream&, RelocationTable&);
 	friend istream& operator>>(istream&, Entry&);
 
-	friend void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE);
+	friend unsigned load(string path_to_obj, Memory& mem);
 
 
 private:

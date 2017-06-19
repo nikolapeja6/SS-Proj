@@ -3,6 +3,7 @@
 #include "reloc_table.h"
 #include "sym_table.h"
 #include "my_util.h"
+#include "emulator.h"
 
 #include <fstream>
 #include <unordered_map>
@@ -10,7 +11,7 @@
 using namespace std;
 
 
-void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE){
+unsigned load(string path_to_obj, Memory& mem){
 
 	mlog.std("started load");
 
@@ -30,11 +31,21 @@ void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE){
 
 	unordered_map<string, pair<RelocationTable, ContentTable>> sections;
 
-	
+	unsigned start;
 
 	try{
 
 		in >> symbol_table;
+
+		
+		if (symbol_table.has_symbol("START"))
+			start = symbol_table.get_value_of_symbol("START");
+		else {
+			string error = "No 'START' symbol found.";
+			mlog.error(error);
+			throw error;
+		}
+
 
 		try{
 			while (true){
@@ -84,9 +95,9 @@ void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE){
 
 	try{
 
-		symbol_table.virtual_load_of_abs_sections(occupance,MAX_SIZE);
+		symbol_table.virtual_load_of_abs_sections(occupance, Memory::MAX_MEM_SIZE);
 
-		symbol_table.virtual_load_of_rel_setions(occupance, MAX_SIZE);
+		symbol_table.virtual_load_of_rel_setions(occupance, Memory::MAX_MEM_SIZE);
 
 		mlog.std("occupance");
 		for (auto p : occupance)
@@ -139,7 +150,7 @@ void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE){
 
 			// LOADING
 			for (int i = 0; i < p.second.second.data.size(); i++)
-				memory[base + i] = p.second.second.data[i];
+				mem[base + i] =  p.second.second.data[i];
 
 			mlog.std("finishd " + p.first);
 		
@@ -156,5 +167,7 @@ void load(string path_to_obj, unsigned char* memory, const unsigned MAX_SIZE){
 
 
 	mlog.std("finished loading");
+
+	return start;
 
 }
