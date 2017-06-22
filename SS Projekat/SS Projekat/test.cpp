@@ -662,6 +662,7 @@ void test102(){
 	cout << "done" << endl;
 }
 
+/*
 void test103(){
 	Context con;
 
@@ -680,6 +681,7 @@ void test103(){
 	cout << "done" << endl;
 }
 
+*/
 #include "emulator.h"
 
 
@@ -702,6 +704,50 @@ void test104(){
 
 
 
+void test_test(){
+	
+	uint32_t START;
+	assemble("test.txt");
+
+	Context con;
+	START = load("obj_test.txt", con.mem);
+
+	con.PC = START;
+	con.execute();
+}
+
+void test_test2(){
+	uint32_t START;
+	assemble("test2.txt");
+
+	Context con;
+	START = load("obj_test2.txt", con.mem);
+
+	con.PC = START;
+	con.execute();
+}
+
+
+void test_test1(){
+	uint32_t START;
+	/*
+	cout << "asm start" << endl;
+	assemble("test1.txt");
+	cout << "asm end" << endl;
+	*/
+	Context con;
+
+	cout << "link start" << endl;
+	START = load("obj_test1.txt", con.mem);
+	cout << "link end" << endl;
+
+	con.PC = START;
+
+	cout << "exe start" << endl;
+	con.execute();
+	
+}
+
 int main(){
 	//test1();
 	//test2();
@@ -711,8 +757,12 @@ int main(){
 
 	//test103();
 
-	test28();
-	test104();
+	//test28();
+	//test104();
+
+	test_test2();
+
+	//test_test1();
 
 	return 0;
 	

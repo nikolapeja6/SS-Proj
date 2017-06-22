@@ -9,22 +9,27 @@
 
 using namespace std;
 
+
 class Memory{
 
 public:
-	static const unsigned MAX_MEM_SIZE = 2000;
+	static const unsigned MAX_MEM_SIZE = 20000;
 
 private:
 
 	uint8_t mem[Memory::MAX_MEM_SIZE];
 
+
+	static const unsigned INPUT_ADDRESS = 4 * 32 + 1;
+	static const unsigned OUTPUT_ADDRESS = 4 * 32;
+
 public:
 
 	Memory();
 
-	uint8_t  get_byte(unsigned address)  const;
-	uint16_t get_word(unsigned address)  const;
-	uint32_t get_dword(unsigned address) const;
+	uint8_t  get_byte(unsigned address)  ;
+	uint16_t get_word(unsigned address)  ;
+	uint32_t get_dword(unsigned address) ;
 
 	void set_byte(unsigned address, uint8_t byte);
 	void set_word(unsigned address, uint16_t word);
@@ -35,10 +40,12 @@ public:
 
 	string str()const;
 
-
-
+	volatile uint8_t INPUT_BUFFER;
+	volatile bool new_read;
 
 };
+
+
 
 class Context{
 
@@ -67,10 +74,13 @@ private:
 
 	volatile bool done;
 
+	void save_context();
+	void restore_context();
+
 	friend void reader_body(Context* );
 	bool new_read;
 	thread reader_thread;
-	static const unsigned INPUT_ADDRESS = 36;
+
 
 	thread timer_thread;
 	friend void timer_body(Context* c);
@@ -122,13 +132,13 @@ private:
 	void ASR(uint8_t reg0, uint8_t reg1, uint8_t reg2);
 	void NOT(uint8_t reg0, uint8_t reg1);
 
-
-
+	friend void test_test1();
+	friend void test_test2();
+	friend void test_test();
 	friend void test104();
 	friend void test103();
 	friend void test102();
 };
-
 
 
 #endif

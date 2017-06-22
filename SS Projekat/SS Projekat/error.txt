@@ -142,113 +142,15 @@ Line does not contain a directive, but get_directive_name was called
 ^^^OK, not an errror
 Line does not contain a directive, but get_directive_name was called
 ^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
-Line does not contain a directive, but get_directive_name was called
-^^^OK, not an errror
 Error reading RelocationTable. First line does not match fpormat '#rel.<section_name>'. Line is '#end'
 ^^^OK, handeled
+#TabelaSimbola
+SEG 1 .data 1 0x82 0xd RW
+SYM 2 label 1 0x0 L
+SYM 3 l 1 0x4 L
+SYM 4 zero 1 0xc L
+SEG 5 .rodata -1 0x0 0x82 R
+SEG 6 .text 6 0x8f 0x58 X
+SYM 7 START 6 0x0 L
+
+INT

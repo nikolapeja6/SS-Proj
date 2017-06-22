@@ -88,5 +88,17 @@
     <Text Include="obj_a.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="test.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="obj_test.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="test2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="test1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

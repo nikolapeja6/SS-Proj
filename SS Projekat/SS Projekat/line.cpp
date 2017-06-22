@@ -15,7 +15,7 @@ using namespace std;
 regex Line::blank("^\\s*$");
 regex Line::comment("^[^;]*;\\s*(.*)$");
 regex Line::label("^\\s*(\\w+)\\s*:[^:]*$");
-regex Line::core("^\\s*(?:\\w+\\s*:\\s*)?([^;:]*)\\s*(?:;\\s*(.*))?$");
+regex Line::core("^\\s*(?:\\w+\\s*:\\s*)?([^;:]*)\\s*(?:;\\s*(.*))?\\s*$");
 
 //regex Line::directive("^\\s*(\\.\\w+|ORG)(\\s+(\\w+))?(\\s*,\\s*(\\w+))*\\s*$");
 //string old_old_define_data = "^\\s*(DB|DW|DD)\\s+([\\?\\s\\w\\+\\-\\*/\\(\\)]+)(?:\\s*,\\s*([\\?\\s\\w\\+\\-\\*/\\(\\)]+))*\\s*$";
@@ -49,7 +49,7 @@ string Line::instruction_names =	Line::flow_instruction_names + "|" +
 
 regex Line::instruction("^\\s*("+Line::instruction_names+")(?:\\s+(.*))?\\s*$");
 
-regex Line::ld_st_extension("^\\s*(?:LOAD(UB|SB|UW|SW)?|STORE(B|W)?)\\s+.*$");
+regex Line::ld_st_extension("^\\s*(?:(?:LOAD|STORE)(UB|SB|UW|SW|B|W)?)\\s+.*$");
 
 string Line::reg = "R(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)|PC|SP";
 regex Line::immed("^#(.*)$");
@@ -233,8 +233,9 @@ string Line::get_directive(){
 	if (regex_match(core, match, Line::org))
 		return core;
 
-	if (regex_match(core, match, Line::section))
-		return core;
+	if (regex_match(core, match, Line::section)){
+		return match[1];
+	}
 
 	if (regex_match(core, match, Line::global))
 		return core;
@@ -736,12 +737,13 @@ vector<unsigned char> Line::get_encoded_define_data_values(){
 			}
 
 			unsigned char x;
+			uint32_t val = i;
 			uint32_t mask = UINT8_MAX;
 			for (int j = 0; j < n; j++){
-				x = (i&mask)>>(8*j);
+				x = uint8_t(val&mask);
 				mlog.std(to_string(j) + "B from " + to_string(i) + " is " + to_string(x));
 				ret.push_back(x);
-				mask <<= 8;
+				val >>= 8;
 			}
 		}
 
@@ -749,7 +751,7 @@ vector<unsigned char> Line::get_encoded_define_data_values(){
 
 	}
 	catch (string s){
-		string error = "Error in get_encoded_define_data_values. " + s;
+		string error = "Error in __define_data_values. " + s;
 		mlog.error(error);
 		throw error;
 	}

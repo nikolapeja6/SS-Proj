@@ -20,5 +20,7 @@ void Log::std(const string& str){
 // for logging error messages
 void Log::error(const string& str){
 	error_file << str << endl;
+	
 	log_file << str << endl;
+	
 }

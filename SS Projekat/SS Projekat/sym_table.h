@@ -75,6 +75,8 @@ public:
 	void set_section_to_absolute(string name);
 
 	int get_section_of_section(string name);
+
+	int get_address_of_section(int index);
 	
 
 	list<pair<string, int>> get_symbols();

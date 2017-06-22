@@ -6,14 +6,21 @@
 #include <chrono>
 #include <iostream>
 
+#include <conio.h>
+
 using namespace std;
 
 
-Context::Context() :done(false), timer_thread(timer_body, this), reader_thread(reader_body, this), new_read(true),
+Context::Context() :done(false), timer_thread(timer_body, this), reader_thread(reader_body, this), mode(1),
 REG({ { 0x00, &R[0] }, { 0x01, &R[1] }, { 0x02, &R[2] }, { 0x03, &R[3] }, { 0x04, &R[4] }, { 0x05, &R[5] }, { 0x06, &R[6] }, { 0x07, &R[7] },
 { 0x08, &R[8] }, { 0x09, &R[9] }, { 0x0a, &R[10] }, { 0x0b, &R[11] }, { 0x0c, &R[12] }, { 0x0d, &R[13] }, { 0x0e, &R[14] }, { 0x0f, &R[15] },
 { 0x10, &SP }, { 0x11, &PC }
-}){}
+}){
+	for (int i = 0; i < 32; i++)
+		interrupts[i] = 0;
+
+	mem.new_read = true;
+}
 
 Context::~Context(){
 	done = true;
@@ -55,19 +62,39 @@ void timer_body(Context* c){
 	}
 }
 
+
 void reader_body(Context* c){
 
+	//cout << "reader started" << endl;
+
+	int i = 0;
+
 	while (!c->done){
-		while (!c->done && !c->new_read);
+
+		//cout << "reader " << (c->mem.new_read ? "true" : "false") << endl;
+
+		while (!c->mem.new_read);
 		
 		if (c->done)
 			break;
+
+		// FETCH NEW CHAR
 		char data = getchar();
 
-		c->mem[Context::INPUT_ADDRESS] = data;
+		mlog.error(to_string(data));
+		i++;
+		//cout << "reader '" + data << endl;
+
+		c->mem.INPUT_BUFFER = data;
+		mlog.error(to_string(c->mem.INPUT_BUFFER));
 		c->new_read = false;
+		c->interrupts[5] = true;
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(Context::DELTA));
 
 	}
+
+	mlog.std("reader ended");
 	
 }
 
@@ -75,12 +102,12 @@ void reader_body(Context* c){
 
 
 
-Memory::Memory(){
+Memory::Memory():new_read(true), INPUT_BUFFER(0){
 	for (int i = 0; i < MAX_MEM_SIZE; i++)
 		mem[i] = UINT8_MAX;
 }
 
-uint8_t Memory::get_byte(unsigned address)const{
+uint8_t Memory::get_byte(unsigned address){
 	
 	if (address >= MAX_MEM_SIZE){
 		string error = "Error accessing memory - address " + to_string(address) + " is out of bounds. MAX_MEM_SIZE is " + to_string(MAX_MEM_SIZE);
@@ -88,10 +115,17 @@ uint8_t Memory::get_byte(unsigned address)const{
 		throw error;
 	}
 
+	if (address == INPUT_ADDRESS){
+		uint8_t ret = INPUT_BUFFER;
+		new_read = true;
+		mlog.error("X");
+		return ret;
+	}
+
 	return mem[address];
 }
 
-uint16_t Memory::get_word(unsigned address)const{
+uint16_t Memory::get_word(unsigned address){
 
 	if (address+1 >= MAX_MEM_SIZE){
 		string error = "Error accessing memory for word - address " + to_string(address+1) + " is out of bounds. MAX_MEM_SIZE is " + to_string(MAX_MEM_SIZE);
@@ -104,7 +138,7 @@ uint16_t Memory::get_word(unsigned address)const{
 	return ret;
 }
 
-uint32_t Memory::get_dword(unsigned address)const{
+uint32_t Memory::get_dword(unsigned address){
 
 	if (address + 3 >= MAX_MEM_SIZE){
 		string error = "Error accessing memory for word - address " + to_string(address + 3) + " is out of bounds. MAX_MEM_SIZE is " + to_string(MAX_MEM_SIZE);
@@ -118,6 +152,12 @@ uint32_t Memory::get_dword(unsigned address)const{
 		ret |= (uint32_t(mem[address + i])<<(i*8));
 	}
 
+	if (address == 800){
+		ret++;
+		ret--;
+
+	}
+
 	return ret;
 }
 
@@ -127,6 +167,21 @@ void Memory::set_byte(unsigned address, uint8_t byte){
 		string error = "Error accessing memory - address " + to_string(address) + " is out of bounds. MAX_MEM_SIZE is " + to_string(MAX_MEM_SIZE);
 		mlog.error(error);
 		throw error;
+	}
+
+	if (address == INPUT_ADDRESS){
+		string error = "Error - user program tries to write in INPUT REGISTER";
+		mlog.error(error);
+		throw error;
+	}
+
+	if (address == OUTPUT_ADDRESS){
+		mlog.std("for out " + to_string(byte));
+		cout << (char)byte;
+	}
+
+	if (address == 800){
+		mlog.std("set_byte " + to_string(byte));
 	}
 
 	mem[address] = byte;
@@ -148,6 +203,10 @@ void Memory::set_word(unsigned address, uint16_t word){
 		word >>= 8;
 	}
 
+	if (address == 800){
+		mlog.std("set_byte " + to_string(word));
+	}
+
 	for (int i = 0; i < 2; i++)
 		mem[address + i] = data[i];
 
@@ -167,6 +226,11 @@ void Memory::set_dword(unsigned address, uint32_t dword){
 		data[i] = dword & UINT8_MAX;
 		dword >>= 8;
 	}
+	if (address == 800 && !(dword <= 10 && dword >=0)  ){
+		mlog.std("set_byte " + to_string(dword));
+	}
+
+
 
 	for (int i = 0; i < 4; i++)
 		mem[address + i] = data[i];
@@ -220,7 +284,12 @@ void Context::execute(){
 	
 	mlog.std("execute started");
 
-	while (true){
+	SP = mem.get_dword(0);
+
+	while (!done){
+
+		if (mode == 0)
+		mlog.std(" start " + to_string(R[2]));
 
 		// INSTRUCTION DECODING AND EXECUTION
 
@@ -274,9 +343,13 @@ void Context::execute(){
 
 			mlog.std("found JMP, CALL");
 
+			if (PC == 1064){
+				mlog.std("a");
+			}
+
 
 			// REGIND
-			if (Context::address_codes("regind") == addrmode){
+			if (Context::address_codes["regind"] == addrmode){
 				
 				int r = *REG[reg0];
 				arg0 = r;
@@ -293,7 +366,7 @@ void Context::execute(){
 			}
 
 			// REGINDOFF
-			if (Context::address_codes("regindoff") == addrmode){
+			if (Context::address_codes["regindoff"] == addrmode){
 
 				int r = *REG[reg0];
 
@@ -312,7 +385,7 @@ void Context::execute(){
 			}
 
 			// MEMDIR
-			if (Context::address_codes("memdir") == addrmode){
+			if (Context::address_codes["memdir"] == addrmode){
 
 				int32_t address = mem.get_dword(PC + 4);
 
@@ -331,7 +404,7 @@ void Context::execute(){
 
 
 
-			error = "Instruction format error. JMP, CALL can have only regdind, regindoff and memdir, but has somethin else.";
+			error = "Instruction format error. JMP, CALL can have only regdind, regindoff and memdir, but has somethin else. PC = "+to_string(PC);
 			mlog.error(error);
 			throw error;
 
@@ -345,7 +418,7 @@ void Context::execute(){
 		case 0x08: // JLZ
 		case 0x09: // JLEZ
 
-			mlog.std("JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ ");
+			//mlog.std("JZ, JNZ, JGZ, JGEZ, JLZ, JLEZ ");
 
 
 			arg0 = *REG[reg0];
@@ -472,7 +545,7 @@ void Context::execute(){
 		case 0x10: // LOAD
 		case 0x11: // STORE
 
-			mlog.std("LOAD, STORE");
+			//mlog.std("LOAD, STORE");
 
 
 			// REGDIR
@@ -572,15 +645,26 @@ void Context::execute(){
 				else *REG[reg0] = mem.get_dword(arg1);
 			}
 			else{ // STORE
+				if (arg1 >= 800 && arg1 <= 803){
+					mlog.std( "STORE PC = " + to_string( PC));
+				}
+
 				if (type == Context::type_codes["B"]){
 					uint8_t data = *REG[reg0] & UINT8_MAX;
+					
 					mem.set_byte(arg1, data);
 				}
 				else if (type == Context::type_codes["W"]){
 					uint16_t data = *REG[reg0] & UINT16_MAX;
 					mem.set_word(arg1, data);
 				}
-				else mem.set_dword(arg1, *REG[reg0]);
+				else {
+					if (opcode == 0x11 && addrmode == 6 && type == 0){
+						mlog.std("reg0 = "+to_string(reg0)+" value = "+to_string(*REG[reg0]));
+					}
+					mem.set_dword(arg1, *REG[reg0]);
+					
+				}
 			}
 
 			break;
@@ -685,11 +769,45 @@ void Context::execute(){
 		
 		}
 
+		//if (mode == 0)
+		//mlog.std(" end " + to_string(R[2])+" opcode = "+to_string(opcode) + " type = "+to_string(type)+" addrmode "+to_string(addrmode)+ " ");
+		if (opcode == 0x11)
+			mlog.std(" opcode = "+to_string(opcode) + " type = "+to_string(type)+" addrmode "+to_string(addrmode)+ " mem[800] "+to_string(mem.get_dword(800))+" arg1 " + to_string(arg1));
+
 
 		// END OF INSTRUCTION EXECUTION
 
 
 		// CHECK FOR INTERUPTS
+
+		if (interrupts[0] == true){
+			done = true;
+			break;
+		}
+
+		if (mode == 0)
+			continue;
+
+		uint32_t address;
+		int i;
+		for (i = 1; i < 32; i++)
+			if (interrupts[i]){
+				address = mem.get_dword(i * 4);
+				if (address != 0)
+					break;
+			}
+		if (i >= 32)
+			continue;
+
+		
+
+		mode = 0;
+		save_context();
+		interrupts[i] = false;
+
+		mlog.error("int");
+
+		PC = address;
 		
 
 		}
@@ -703,26 +821,72 @@ void Context::execute(){
 }
 
 
+void Context::save_context(){
 
-void Context::INT(uint32_t){
+	for (int i = 0; i < 16; i++){
+		SP += 4;
+		mem.set_dword(SP, R[i]);
+	}
 
+	SP += 4;
+
+	if (SP >= 800 && SP <= 803){
+		mlog.std(" save context PC = " + to_string(PC));
+	}
+
+	mem.set_dword(SP, PC);
+}
+
+void Context::restore_context(){
+	
+	uint32_t value;
+
+	for (int i = 15; i >= 0; i--){
+		value = mem.get_dword(SP);
+		R[i] = value;
+		SP -= 4;
+	}
+}
+
+
+
+void Context::INT(uint32_t entry){
+	mlog.error("INT");
+	if (entry >= 32){
+		string error = "Error - INT caled for entry greather than 31 - called for " + to_string(entry);
+		mlog.error(error);
+		throw error;
+	}
+
+	interrupts[entry] = true;
 }
 
 void Context::JMP(uint32_t address){
+	mlog.error("JMP");
 	PC = address;
 }
 
 void Context::CALL(uint32_t function){
+	mlog.error("CALL");
 	SP += 4;
+	if (SP >= 800 && SP <= 803){
+		mlog.std(" CALL PC = " + to_string(PC));
+	}
+
 	mem.set_dword(SP, PC);
 	PC = function;
 }
 
 void Context::RET(){
+	mlog.error("RET");
 	uint32_t val;
 	val = mem.get_dword(SP);
 	SP -= 4;
 	PC = val;
+	if (mode == 0){
+		restore_context();
+		mode = 1;
+	}
 }
 
 void Context::JZ(int32_t value, uint32_t address){
@@ -740,13 +904,20 @@ void Context::JGZ(int32_t value, uint32_t address){
 }
 
 void Context::JGEZ(int32_t value, uint32_t address){
+	//mlog.error("JGEZ");
 	if (value >= 0)
 		PC = address;
 }
 
 void Context::JLZ(int32_t value, uint32_t address){
-	if (value < 0)
+
+	if (value < 0){
+		mlog.std("JLZ done");
 		PC = address;
+	}
+	else{
+		//cout << hex << value << endl;
+	}
 }
 
 void Context::JLEZ(int32_t value, uint32_t address){
@@ -756,6 +927,10 @@ void Context::JLEZ(int32_t value, uint32_t address){
 
 void Context::PUSH(uint32_t value){
 	SP += 4;
+
+	if (SP >= 800 && SP <= 803){
+		mlog.std("PUSH PC = " + to_string(PC));
+	}
 	mem.set_dword(SP, value);
 }
 
@@ -767,23 +942,26 @@ uint32_t Context::POP(){
 }
 
 void Context::ADD(uint8_t reg0, uint8_t reg1, uint8_t reg2){
-	*REG[reg0] = *REG[reg1] + *REG[reg2];
+	*REG[reg0] = (int)*REG[reg1] + (int)*REG[reg2];
 }
 
 void Context::SUB(uint8_t reg0, uint8_t reg1, uint8_t reg2){
-	*REG[reg0] = *REG[reg1] - *REG[reg2];
+	
+	*REG[reg0] = (int)*REG[reg1] - (int)*REG[reg2];
+	mlog.std(to_string(*REG[reg1]) + " - " + to_string(*REG[reg2]) + " = " + to_string(*REG[reg0]));
+	//cout << "S"<<hex << *REG[reg0] << endl;
 }
 
 void Context::MUL(uint8_t reg0, uint8_t reg1, uint8_t reg2){
-	*REG[reg0] = *REG[reg1] * *REG[reg2];
+	*REG[reg0] = (int)*REG[reg1] * (int)*REG[reg2];
 }
 
 void Context::DIV(uint8_t reg0, uint8_t reg1, uint8_t reg2){
-	*REG[reg0] = *REG[reg1] / *REG[reg2];
+	*REG[reg0] = (int)*REG[reg1] / (int)*REG[reg2];
 }
 
 void Context::MOD(uint8_t reg0, uint8_t reg1, uint8_t reg2){
-	*REG[reg0] = *REG[reg1] % *REG[reg2];
+	*REG[reg0] = (int)*REG[reg1] % (int)*REG[reg2];
 }
 
 void Context::AND(uint8_t reg0, uint8_t reg1, uint8_t reg2){

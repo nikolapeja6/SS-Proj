@@ -56,15 +56,17 @@ string ContentTable::str()const{
 
 istream& operator>>(istream& in, ContentTable& table){
 
-	regex first_line("^\\.\\w+(\\.\\d+)?$");
+	regex first_line("^(\\.\\w+(\\.\\d+)?)\\s*$");
 
 	string line;
+	smatch match;
 	getline(in, line);
 
-	if (!regex_match(line, first_line))
+	if (!regex_match(line, match, first_line))
 		throw "First line is not in format '.<section_name>'. Line is '" + line + "'";
 
-	table.set_section_name(line);
+	string name = match[1];
+	table.set_section_name(name);
 
 	try{
 

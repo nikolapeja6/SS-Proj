@@ -35,6 +35,7 @@ string assemble(const string& path_to_source){
 	bool next_ORG = false;
 	int section_index = -1;
 	string section_type = "";
+	int first_pc = 0;
 
 	string error = "";
 	int i = 0;
@@ -74,12 +75,12 @@ string assemble(const string& path_to_source){
 
 				if (directive_name == "ORG"){
 					if (section_index != -1)
-						symbol_table.set_section_size(section_index, pc);
+						symbol_table.set_section_size(section_index, pc - first_pc);
 					next_ORG = true;
 
 					line.replace_symbols(symbols);
 
-					pc = line.get_org_value(); // CONST
+					first_pc = pc = line.get_org_value(); // CONST
 				}
 				else if (line.has_define_data()){
 
@@ -98,11 +99,11 @@ string assemble(const string& path_to_source){
 				else if (line.has_section()){
 
 					if (section_index != -1 && !next_ORG)
-						symbol_table.set_section_size(section_index, pc);
+						symbol_table.set_section_size(section_index, pc - first_pc);
 
 					string name = line.get_directive();
 					if (!next_ORG)
-						pc = 0;
+						first_pc = pc = 0;
 					symbol_table.add_section_entry(name, pc);
 
 
@@ -113,7 +114,7 @@ string assemble(const string& path_to_source){
 						symbol_table.set_section_to_absolute(name);
 
 					section_index = symbol_table.get_index_of_section(name);
-					section_type = line.get_directive_name();
+					section_type = line.get_directive();
 
 				}
 				else if (line.get_directive_name() == ".global"){
@@ -141,7 +142,7 @@ string assemble(const string& path_to_source){
 			if (line.has_directive() && line.get_directive_name() == ".end"){
 				end = true;
 				if (section_index != -1)
-					symbol_table.set_section_size(section_index, pc);
+					symbol_table.set_section_size(section_index, pc - first_pc);
 				break;
 			}
 
@@ -157,7 +158,7 @@ string assemble(const string& path_to_source){
 	}
 
 	if (!end)
-		symbol_table.set_section_size(section_index, pc);
+		symbol_table.set_section_size(section_index, pc-first_pc);
 
 
 	fin.close();
@@ -213,6 +214,8 @@ string assemble(const string& path_to_source){
 		Line line(l);
 		i++;
 
+		bool found_something = false;
+
 		try{
 
 
@@ -224,6 +227,7 @@ string assemble(const string& path_to_source){
 
 
 			if (line.has_directive()){
+				found_something = true;
 				string directive_name = line.get_directive_name();
 				if (line.has_define_data()){
 
@@ -273,6 +277,7 @@ string assemble(const string& path_to_source){
 
 
 			if (line.has_instruction()){
+				found_something = true;
 				move = line.get_instruction_size();
 
 				bool pcrel = false;
@@ -286,6 +291,9 @@ string assemble(const string& path_to_source){
 
 
 				for (string s : relocation_symbols){
+					if (!symbol_table.has_symbol(s))
+						continue;
+
 					int index = symbol_table.get_index_of_symbol(s);
 
 					if (symbol_table.get_section_of_symbol(s) == -1)
@@ -316,6 +324,11 @@ string assemble(const string& path_to_source){
 				break;
 			}
 
+
+			if (!found_something){
+					string skiped = "Nothing found or undefined instruction - line skipped. Line is '" + line.get_line() + "'";
+					mlog.error(error);
+			}
 
 			mlog.std("line is '" + line.get_line() + "; pc = " + to_string(pc) + "; new pc = " + to_string(pc + move));
 			pc += move;

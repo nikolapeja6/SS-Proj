@@ -38,9 +38,7 @@ unsigned load(string path_to_obj, Memory& mem){
 		in >> symbol_table;
 
 		
-		if (symbol_table.has_symbol("START"))
-			start = symbol_table.get_value_of_symbol("START");
-		else {
+		if (!symbol_table.has_symbol("START")){
 			string error = "No 'START' symbol found.";
 			mlog.error(error);
 			throw error;
@@ -91,7 +89,7 @@ unsigned load(string path_to_obj, Memory& mem){
 	vector<pair<unsigned, unsigned>> occupance;
 
 	// IVT
-	occupance.push_back(make_pair(0, 40));
+	//occupance.push_back(make_pair(0, 4*32+2)); // 32 Entryies of 4B, and 2 reg (IN OUT) of 1B
 
 	try{
 
@@ -154,6 +152,15 @@ unsigned load(string path_to_obj, Memory& mem){
 
 			mlog.std("finishd " + p.first);
 		
+		}
+
+
+		mlog.error(symbol_table.str());
+
+		start = symbol_table.get_value_of_symbol("START");
+		if (symbol_table.get_section_of_symbol("START") != -1){
+			int index = symbol_table.get_section_of_symbol("START");
+			start += symbol_table.get_address_of_section(index);
 		}
 
 	}

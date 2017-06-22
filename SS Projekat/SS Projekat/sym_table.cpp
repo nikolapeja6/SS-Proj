@@ -144,7 +144,7 @@ void SymbolTable::set_section_size(string name, unsigned size){
 }
 
 void SymbolTable::set_section_size(int index, unsigned size){
-	if (index <1 || index >= entries.size()){
+	if (index <1 || index > entries.size()){
 		string error = "set_section_size encountered an error. Entry with index '" + to_string(index) + " does not exist exist.";
 		mlog.error(error);
 		throw error;
@@ -497,5 +497,15 @@ pair<unsigned, unsigned> SymbolTable::get_overlap(unsigned beginning, unsigned e
 	throw error;
 	
 
+}
+
+int SymbolTable::get_address_of_section(int index){
+	if (index < 0 || index>entries.size()){
+		string error = "Error - index of section in get_address_of_section is out out bounds - " + to_string(index);
+		mlog.error(error);
+		throw error;
+	}
+
+	return entries[index-1].value;
 }
 
