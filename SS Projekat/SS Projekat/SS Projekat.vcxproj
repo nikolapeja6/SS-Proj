@@ -93,7 +93,10 @@
     <ClCompile Include="line.cpp" />
     <ClCompile Include="loader.cpp" />
     <ClCompile Include="log.cpp" />
-    <ClCompile Include="my_util.cpp" />
+    <ClCompile Include="main1.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">test1.txt %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="main2.cpp" />
     <ClCompile Include="reloc_table.cpp" />
     <ClCompile Include="sym_table.cpp" />
     <ClCompile Include="test.cpp" />

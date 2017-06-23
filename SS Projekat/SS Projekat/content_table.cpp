@@ -77,7 +77,7 @@ istream& operator>>(istream& in, ContentTable& table){
 
 			unsigned data;
 			while (l>>hex>>data)
-				table.append((unsigned char)(data & UCHAR_MAX));
+				table.append((unsigned char)(data & UINT8_MAX));
 	
 		}
 

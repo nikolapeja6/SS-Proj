@@ -6,12 +6,22 @@
 #include <chrono>
 #include <iostream>
 
+#ifdef _WIN32
 #include <conio.h>
+#endif
+
+#ifdef linux
+#include <ncurses.h>
+#endif
+
+
 
 using namespace std;
 
 
-Context::Context() :done(false), timer_thread(timer_body, this), reader_thread(reader_body, this), mode(1),
+void timer_body(Context*);
+
+Context::Context() :done(false), timer_thread(timer_body, this), /*reader_thread(reader_body, this), */mode(1),
 REG({ { 0x00, &R[0] }, { 0x01, &R[1] }, { 0x02, &R[2] }, { 0x03, &R[3] }, { 0x04, &R[4] }, { 0x05, &R[5] }, { 0x06, &R[6] }, { 0x07, &R[7] },
 { 0x08, &R[8] }, { 0x09, &R[9] }, { 0x0a, &R[10] }, { 0x0b, &R[11] }, { 0x0c, &R[12] }, { 0x0d, &R[13] }, { 0x0e, &R[14] }, { 0x0f, &R[15] },
 { 0x10, &SP }, { 0x11, &PC }
@@ -20,14 +30,29 @@ REG({ { 0x00, &R[0] }, { 0x01, &R[1] }, { 0x02, &R[2] }, { 0x03, &R[3] }, { 0x04
 		interrupts[i] = 0;
 
 	mem.new_read = true;
+
+
+#ifdef linux
+	initscr();
+
+	cbreak();
+	noecho();
+	nodelay(stdscr, TRUE);
+
+	scrollok(stdscr, TRUE);
+
+#endif
+
 }
 
 Context::~Context(){
 	done = true;
 
 	timer_thread.join();
+	/*
 	reader_thread.detach();
 	reader_thread.~thread();
+	*/
 }
 
 
@@ -61,6 +86,8 @@ void timer_body(Context* c){
 		c->interrupts[Context::TIMER_ENTRY] = true;
 	}
 }
+
+/*
 
 
 void reader_body(Context* c){
@@ -97,6 +124,7 @@ void reader_body(Context* c){
 	mlog.std("reader ended");
 	
 }
+*/
 
 
 
@@ -286,7 +314,7 @@ void Context::execute(){
 
 	SP = mem.get_dword(0);
 
-	while (!done){
+	while (true){
 
 		if (mode == 0)
 		mlog.std(" start " + to_string(R[2]));
@@ -781,12 +809,41 @@ void Context::execute(){
 		// CHECK FOR INTERUPTS
 
 		if (interrupts[0] == true){
-			done = true;
+			done = false;
 			break;
 		}
 
 		if (mode == 0)
 			continue;
+
+
+		// READER
+
+		// WIN
+#ifdef _WIN32
+		if (kbhit() && mem.new_read){
+			char data = _getch();
+			//cin.get(data);
+			mem.INPUT_BUFFER = data;
+			//mlog.error(to_string(mem.INPUT_BUFFER));
+			mem.new_read = false;
+			interrupts[5] = true;
+			putch(data);
+			//cout << data;
+		}
+#endif
+
+		// LINUX
+#ifdef linux
+		int ch = getch();
+
+		if(mem.new_read && ch != ERR){
+			mem.INPUT_BUFFER = ch;
+			mem_new_read = false;
+			// putch(data);
+		}
+		
+#endif
 
 		uint32_t address;
 		int i;
@@ -957,7 +1014,13 @@ void Context::MUL(uint8_t reg0, uint8_t reg1, uint8_t reg2){
 }
 
 void Context::DIV(uint8_t reg0, uint8_t reg1, uint8_t reg2){
-	*REG[reg0] = (int)*REG[reg1] / (int)*REG[reg2];
+	if (reg2 != 0)
+		*REG[reg0] = (int)*REG[reg1] / (int)*REG[reg2];
+	else{
+		interrupts[3] = true;
+		string error = "DIVISION BY 0";
+		mlog.error(error);
+	}
 }
 
 void Context::MOD(uint8_t reg0, uint8_t reg1, uint8_t reg2){

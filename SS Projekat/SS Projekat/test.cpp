@@ -14,7 +14,7 @@ void test1(){
 	mlog.std("End of test");
 }
 
-
+/*
 void test2(){
 	string lines[]{	".data",
 					"a : DD a",
@@ -33,6 +33,8 @@ void test2(){
 	for (int i = 0; i < 8; i++)
 		mlog.std(clean_line(lines[i]));
 }
+
+*/
 
 #include <regex>
 #include <iostream>
@@ -730,11 +732,11 @@ void test_test2(){
 
 void test_test1(){
 	uint32_t START;
-	/*
+	
 	cout << "asm start" << endl;
 	assemble("test1.txt");
 	cout << "asm end" << endl;
-	*/
+	
 	Context con;
 
 	cout << "link start" << endl;
@@ -748,6 +750,7 @@ void test_test1(){
 	
 }
 
+/*
 int main(){
 	//test1();
 	//test2();
@@ -760,10 +763,12 @@ int main(){
 	//test28();
 	//test104();
 
-	test_test2();
+	//test_test2();
 
-	//test_test1();
+	test_test1();
 
 	return 0;
 	
 }
+
+*/

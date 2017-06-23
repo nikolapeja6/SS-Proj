@@ -360,7 +360,11 @@ string assemble(const string& path_to_source){
 	mlog.std("\n\n\n***\n\n" + output.str());
 
 	ofstream out;
-	out.open("obj_" + path_to_source);
+	regex not_extension("^(.+)\\.([^\\.]+)$");
+	smatch match;
+
+	regex_match(path_to_source, match, not_extension);
+	out.open(match[1].str()+"_obj."+match[2].str());
 	out << output.str();
 	out.close();
 	
@@ -368,5 +372,5 @@ string assemble(const string& path_to_source){
 
 	mlog.std("assemble finished");
 
-	return "obj_"+path_to_source;
+	return match[1].str() + "_obj." + match[2].str();
 }

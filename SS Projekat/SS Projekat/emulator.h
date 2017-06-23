@@ -77,9 +77,9 @@ private:
 	void save_context();
 	void restore_context();
 
-	friend void reader_body(Context* );
+	//friend void reader_body(Context* );
 	bool new_read;
-	thread reader_thread;
+	//thread reader_thread;
 
 
 	thread timer_thread;
@@ -131,6 +131,10 @@ private:
 	void ASL(uint8_t reg0, uint8_t reg1, uint8_t reg2);
 	void ASR(uint8_t reg0, uint8_t reg1, uint8_t reg2);
 	void NOT(uint8_t reg0, uint8_t reg1);
+
+
+
+	friend int main(int, char**);
 
 	friend void test_test1();
 	friend void test_test2();

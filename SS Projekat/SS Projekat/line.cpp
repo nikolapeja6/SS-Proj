@@ -49,12 +49,12 @@ string Line::instruction_names =	Line::flow_instruction_names + "|" +
 
 regex Line::instruction("^\\s*("+Line::instruction_names+")(?:\\s+(.*))?\\s*$");
 
-regex Line::ld_st_extension("^\\s*(?:(?:LOAD|STORE)(UB|SB|UW|SW|B|W)?)\\s+.*$");
+regex Line::ld_st_extension("^\\s*(?:(?:LOAD|STORE)(UB|SB|UW|SW|B|W)?).*$");
 
 string Line::reg = "R(?:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15)|PC|SP";
 regex Line::immed("^#(.*)$");
 regex Line::regdir("^\\s*("+Line::reg+")\\s*$");
-regex Line::regind("^\s*\\[\\s*("+Line::reg+")\\s*\\]\\s*$");
+regex Line::regind("^\\s*\\[\\s*("+Line::reg+")\\s*\\]\\s*$");
 regex Line::regindoff("^\\s*\\[\\s*(" + Line::reg + ")\\s*\\+\\s*(.*)\\s*\\]\\s*$");
 regex Line::pcrel("^\\s*\\$\\s*(\\w+)\\s*$");
 
@@ -1294,7 +1294,7 @@ vector<unsigned char> Line::get_encoded_instruction(list<pair<string, int>> symb
 
 	vector<unsigned char> v;
 
-	uint32_t mask = UCHAR_MAX;
+	uint32_t mask = UINT8_MAX;
 	for (int i = 0; i < 4; i++){
 		unsigned char x = first&mask;
 		v.push_back(x);
