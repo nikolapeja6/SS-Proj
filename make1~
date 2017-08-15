@@ -1,0 +1,2 @@
+exe1: main1.cpp asm.cpp asm.h content_table.cpp content_table.h line.cpp line.h log.cpp log.h my_util.cpp my_util.h reloc_table.cpp reloc_table.h sym_table.cpp sym_table.h 
+	g++ -std=c++0x -o exe1 main1.cpp asm.cpp content_table.cpp  line.cpp  log.cpp  my_util.cpp reloc_table.cpp  sym_table.cpp -I.
