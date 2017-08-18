@@ -3,4 +3,4 @@ sudo apt-get update
 sudo apt-get install g++-4.9
 
 
-+ apt get for ncurses
+sudo apt-get install libncurses5-dev libncursesw5-dev
