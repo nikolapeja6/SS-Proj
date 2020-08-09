@@ -1,0 +1,63 @@
+
+
+OUT DEF 4*32
+
+	.bss
+SP:
+	DD 20 DUP ?
+
+
+
+	ORG 0
+	.rodata
+	
+	DD SP
+	DD 31 DUP 0
+
+
+
+
+	.text.1
+f:
+	LOAD R1, SP
+	LOAD R2, #4
+	SUB R1, R1, R2
+	LOAD R0, [R1]
+	SUB R1, R1, R2
+	LOAD R3, [R1]
+	ADD R0, R0, R3
+	RET
+
+
+
+	.test.2
+START:
+	LOAD R1, #2
+	PUSH R1
+	LOAD R1, #5
+	PUSH R1
+	CALL f
+
+	LOAD R1, #'0'
+	ADD R0, R0, R1
+	STOREB R0, OUT		; '7'
+
+
+	LOAD R0, #61		; =
+	STOREB R0, OUT
+
+	POP R0
+	ADD R0, R1, R0
+	STOREB R0, OUT
+
+	LOAD R0, #43		;+
+	STOREB R0, OUT
+
+	POP R0
+	ADD R0, R0, R1
+	STOREB R0, OUT
+
+	LOAD R0, #0
+	INT R0
+
+	.end

@@ -1,0 +1,2 @@
+exe2: main2.cpp content_table.cpp content_table.h log.cpp log.h my_util.cpp my_util.h reloc_table.cpp reloc_table.h sym_table.cpp sym_table.h loader.cpp loader.h emulator.cpp emulator.h
+	g++-4.9 -std=c++0x -o exe2 main2.cpp content_table.cpp  log.cpp  my_util.cpp reloc_table.cpp  sym_table.cpp emulator.cpp loader.cpp -I. -pthread -lncurses

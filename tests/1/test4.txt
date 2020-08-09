@@ -1,0 +1,33 @@
+
+OUT DEF 4*32
+
+
+	.text.1
+timer:
+	LOADUB R1, #'a'
+	STOREB R1, OUT
+	RET
+
+
+	
+	.bss
+SP:
+	DD 20 DUP ?
+
+
+	ORG 0
+	.rodata
+	
+	DD SP
+	DD 3 DUP 0
+	DD timer
+	DD 17 DUP 0
+
+
+
+
+	.text.2
+START: 	LOAD R1, #0
+loop:	JZ R1, loop
+
+	.end
